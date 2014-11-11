@@ -126,13 +126,15 @@ bool write_points(string path, bool amend)
         cout << "Could not open output file for writing.";
         return 1;
     }
+    else
+        cout << "File opened at: " << path << endl;
 
-    for(int i=0; i<(desc_pts.size() - 1); i++)
+    for(int i=0; i<(desc_pts.size()); i++)
     {
         dataFile << desc_pts[i].y << ',' << desc_pts[i].x;
-        if(i < (desc_pts.size()-2))
+        if(i < (desc_pts.size()-1))
             dataFile << ',';
-        if(i == (desc_pts.size() - 2))
+        if(i == (desc_pts.size()-1))
             dataFile << endl;
     }
 
