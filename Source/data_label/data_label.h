@@ -129,7 +129,7 @@ bool write_points(string path, bool amend)
 
     for(int i=0; i<(desc_pts.size() - 1); i++)
     {
-        dataFile << desc_pts[i].x << ',' << desc_pts[i].y;
+        dataFile << desc_pts[i].y << ',' << desc_pts[i].x;
         if(i < (desc_pts.size()-2))
             dataFile << ',';
         if(i == (desc_pts.size() - 2))
