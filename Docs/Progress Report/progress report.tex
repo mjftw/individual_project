@@ -38,17 +38,39 @@ MEng Electronic Engineering\\}
 \end{center}
 \end{titlepage}
 %
+\renewenvironment{abstract}
+  {\small\quotation
+  {\bfseries\noindent{\large\abstractname}\par\nobreak\smallskip}}
+  {\endquotation}
+%
+\thispagestyle{empty}
+\setcounter{page}{0}
+\begin{abstract}\textbf{\emph{
+Contrary to popular belief, skydiving is a competitive and technical sport, requiring careful control of body position in order to not only remain stable, but also to move around the sky in freefall in a controlled manner. A popular discipline in competitive skydiving is formation skydiving, where a group of skydivers form set shapes with their bodies whilst in freefall. It is proposed that a software tool will be written that is able to judge formation skydiving competitions fully automatically, potentially removing the need for manual judging.
+}}\end{abstract}
+\clearpage
+%
 \thispagestyle{empty}
 \setcounter{page}{0}
 \tableofcontents
-
 \clearpage
-\section{Introduction}
-%
 \section{Background}
-Contrary to popular belief, skydiving is a competitive and technical sport, requiring careful control of body position in order to not only remain stable, but also to move around the sky in freefall in a controlled manner.\\
-A popular discipline in the sport is formation skydiving (FS). This involves multiple skydivers forming set formations in freefall, in order to score as many points as possible. A point is awarded for each successful formation in a sequence \textbf{\emph{(see figure \ref{fig:fs_dive_pool})}}. In 4 person FS (4-way FS) each skydiver has a specific slot in the formation. This is the position that they will always take in order to make each formation. This is done in such a way to minimise the amount of movement required for each skydiver when transitioning between formations. The four slots in 4-way FS are Point, Tail, Outside Center (OC) and Inside Center (IC). 
+	\subsection{Formation Skydiving}
+Skydiving is a competitive and technical sport, requiring careful control of body position in order to move around the sky in a controlled manner whilst in freefall.\\
+A popular discipline in the sport is formation skydiving (FS). This involves multiple skydivers forming set shapes with their bodies, in order to score as many points as possible.
+		\subsubsection{Rules}
+		A point is awarded for each successful formation in a sequence \textbf{\emph{(see figure \ref{fig:fs_dive_pool})}}. A successful formation is defined only by the correct hands of each skydiver holding the correct grips on the other skydivers \textbf{\emph{(see figure \ref{fig:grips})}}, and not by the orientation of the skydivers themselves.
 %
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\linewidth]{grips.png}
+	\caption{Diagram showing all of the available grips on a formation skydiving suit.}
+	\label{fig:grips}
+\end{figure}
+%
+\noindent In 4 person FS (4-way FS) each skydiver has a specific slot in the formation. This is the position that they will always take in order to make each formation. This is done in such a way that the amount of movement required for each skydiver when transitioning between formations is minimised. The four slots in 4-way FS are known as Point, Tail, Outside Center (OC) and Inside Center (IC). 
+%
+	\subsubsection{Training Practices}
 In order for the team to create formations in the sky, it is important that they practice the skydive multiple times on the ground. This is known as "dirt diving" and is often done using partially triangular wheeled platforms that each skydiver lays on, known as "creepers"  \textbf{\emph{(see figures \ref{fig:creepers} and \ref{fig:creepers_use})}}.
 \begin{figure}[H]
 	\centering
@@ -67,8 +89,9 @@ In order for the team to create formations in the sky, it is important that they
 	\caption{Images reproduced from \url{www.skydivespaceland.com/blog/images/creepers2.jpg} and \url{www.skydiveaz.com/images/old-images/creepers.jpg}}
 \end{figure}
 %
+\noindent Another way that FS teams train is to use a vertical (indoor skydiving) wind tunnel. A fan is mounted at the bottom of the tunnel creating a strong wind that the skydivers can float on; simulating the environment of a regular skydive, but in a much more controlled environment \textbf{\emph{(see figure \ref{fig:sample_tunnel})}}.
 	\subsection{Project Brief}
-The original focus of the project was to analyse video of dirt diving and identify which formations have been performed. The focus has been modified, and is now to analyse footage of formation skydiving in a vertical wind tunnel, indoor skydiving. This change is due to the fact that the body position of a skydiver in the wind tunnel is exactly the same as that of a skydiver in freefall. The wind is turned up to freefall speeds, simulating the environment of a regular skydive, but in a much more controlled environment. Another benefit of analysing footage taken in a wind tunnel is that the camera is mounted above the formation, and remains static \textbf{\emph{(see figure \ref{fig:sample_tunnel})}}. The set of formations I will be analysing are the BPA rookie class of formations known as 'randoms'. The software must be able to recognise all 16 of the randoms \textbf{\emph{(see figure \ref{fig:fs_dive_pool})}}.
+The original focus of the project was to analyse video of dirt diving and identify which formations have been performed. The focus has been modified, and is now to analyse footage of formation skydiving in a vertical wind tunnel. This change is largely due to the fact that the body position of a skydiver freefall is much more similar to their body position in a wind tunnel, than to dirt diving. Another benefit of analysing footage taken in a wind tunnel is that the camera is mounted above the formation, remaining static \textbf{\emph{(see figure \ref{fig:sample_tunnel})}}. This allows the skydivers to much more easily be separated from the background via background subtraction. The set of formations that will be analysed are the BPA rookie class of formations known as 'randoms'. The software must be able to recognise all 16 of the randoms \textbf{\emph{(see figure \ref{fig:fs_dive_pool})}}.
 %
 \begin{figure}[H]
 	\centering
@@ -101,18 +124,65 @@ The original focus of the project was to analyse video of dirt diving and identi
 	\label{fig:sample_tunnel}
 \end{figure}
 %
+\noindent An image of a skydiver in an FS body position can be simplified to a set of line segments between 11 key points; one for the waist, neck, head, left and right hands, elbows, knees and feet \textbf{\emph{(see figure \ref{fig:stick_model_fitted})}}.
+%
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{stick_model_fitted.png}
+	\caption{Diagram showing how an image of a skydiver can be simplified to a set of line segments between 11 points.}
+	\label{fig:stick_model_fitted}
+\end{figure}
+%
+\noindent In order to complete this project C++ will be used, making use of the open source computer vision library OpenCV 3.0 in order to reduce the time required to perform standard tasks, such as loading an image file, or receiving a video feed.
+If a graphical user interface (GUI) were to be implemented, the open source GUI library Qt 5.3 would be used.
+These libraries are platform independent; this should ensure that the program is not tied to any single operating system.
+%
 \section{Literature Report}
 %
-List sources...
-How does generalised procrasts analysis work?\\
+Due to the specialist nature of the project, relevant existing literature is somewhat limited.
+However, there does exist literature relevant to active shape models\cite{cootes}.
+Active shape models are statistical shape models that are able iteratively deform in order to fit a given example image. They can also be used to characterise the ways in which a set of points in an image can move. Using principal component analysis\cite{icl_pca}, it is possible to find a minimal set of feature variables which control the overall shape of an object. Varying these enables every possible permutation of the set of image points to be found.\\
+In order for this to be done, a training set of points must be collected by hand from images similar to those that will be analysed. This This training set of points forms the initial point matrix.
+%
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=.5\linewidth]{shape_matrix.png}
+	\caption{Initial point matrix. Each row corresponds to a different image (blue). Pairs of columns contain coordinates of the same point across each of the images (red).}
+	\label{fig:shape_matrix}
+\end{figure}
+%
+\noindent The iterative algorithm generalised procrustes analysis (GPA) is then used to optimally rotate, scale, and translate the points from each image. The goal of this is to have the points from each image match as closely as possible when superimposed on each other \textbf{\emph{(see figure \ref{fig:procrastes})}}.
+%
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{generalised_procrastes_ananlysis.png}
+	\caption{Performing generalised procrustes analysis on three shapes}
+	\label{fig:procrastes}
+\end{figure}
+%
+\noindent A shape matrix can be created using the same format as the initial point matrix, but containing the coordinates of the aligned image points.
+Finally, principal component analysis is used to reduce the dimensions of the shape matrix. This is done by finding the eigenvalues and eigenvectors of the covariance matrix. A more in depth explanation can be found at \cite{icl_pca}.
+%
+\\\\List sources...
+How does generalised procrustes analysis work?\\
 How do active shape and point distribution models work?\\
 What am I using for skeletonisation?
 \section{Proposed Final Design}
 %
-The proposed final design will take the form of a command line tool. It will take a video of formation skydiving to be analysed. It will output the same video file, but with an overlay showing which formations have been formed. It will also highlight the skeletons of the skydivers in different colours in order to show which slot in the formation they are flying. The skeletons will take the same colours as in \textbf{\emph{\ref{fig:fs_dive_pool}}}.
+The proposed final design will take the form of a command line tool. It will take a video of formation skydiving to be analysed. It will output the same video file, but with an overlay showing which (if any) formations have been made. It will also highlight the skeletons of the skydivers in different colours in order to show which slot in the formation they are flying. The skeletons will take the same colours as in \textbf{\emph{figure \ref{fig:fs_dive_pool}}}. Time permitting, a GUI may be implemented for the command line tool in order to make the software more user friendly.\\
+\\
+%
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{flow_chart.png}
+	\caption{Flowchart showing overall functionality of proposed final design. Items shown in green have been completed. Items inside the red box are to be executed only once, and their results saved for later use.}
+	\label{fig:flowchart}
+\end{figure}
+%
+%
 \section{Completed Work}
 	\subsection{Data Collection}
-	Software has been written that handles collection of data for the initial point 			matrix to be used to create the point distribution model. In order to speed up data collection, the program displays an image of a skydiver and asks the user to left click on different parts of the skydivers body. The user can undo the last point by right clicking. Once all the points for the image are recorded, they are written to an output file and form the next row of the initial point matrix. Another image is then shown and the process repeats. This is a console based application and takes the file path of an image list as its only input \textbf{\emph{(see figure \ref{fig:data_collection})}}. This image list is stored in an XML file, as OpenCV natively supports input and output to XML files. For each image, the program adds another row to the initial point matrix. This contains the coordinates of each point x1, y1, x2, y2, ... ,x11 ,y11 and stores the data for each new image in another row. Currently only 10 images have been used to create the initial point matrix, but this number will be increased before it is used to create the point distribution model.
+	Software has been written that handles collection of data for the initial point 			matrix to be used to create the point distribution model. In order to speed up data collection, the program displays an image of a skydiver and asks the user to left click on different parts of the skydivers body. The user can undo the last point by right clicking. Once all the points for the image are recorded, they are written to an output file and form the next row of the initial point matrix. Another image is then shown and the process repeats. This is a console based application and takes the file path of an image list as its only input \textbf{\emph{(see figure \ref{fig:data_collection})}}. This image list is stored in an XML file, as OpenCV natively supports input and output to XML files. For each image, the program adds another row to the initial point matrix \textbf{\emph{(see figure \ref{fig:shape_matrix})}}. Currently only 10 images have been used to create the initial point matrix, but this number will be increased before it is used to create the point distribution model.
 %
 \begin{figure}[H]
 	\centering
@@ -171,8 +241,15 @@ Secondary conditions:
         \end{enumerate}
 %
 Repeat process until no points are deleted.\\
-For more a more in depth explanation of the algorithm, see \cite{skeletonisation}.
-       
+For more a more in depth explanation of the algorithm, see \cite{skeletonisation}.\\
+\\
+Initially a simpler algorithm\cite{skeletonisation_simple} was used in order to create the skeleton using morphological operations to perform thinning. However, this algorithm did not ensure that the skeleton created was minimal or connected, and was therefore insufficient.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{skel_simple.jpg}
+	\caption{Result of using the morphological thinning algorithm on the binary image shown in \textbf{\emph{figure \ref{fig:skel_src_mask}}}.}
+	\label{fig:skel_simple}
+\end{figure}
 \subsubsection{Skeleton Simplification Algorithm}
 	The RDP algorithm is designed to simplify a curve, while still maintaining its overall shape. A curve can be thought of as a collection of linked line segments, with each line segment stretching between two consecutive points on the curve. The basic principle of the algorithm is to reduce the number of line segments in a curve; creating a similar, but simplified curve. The algorithm is initially given an ordered array of all the points in the curve. The algorithm is also given the variable $\epsilon$; this defines the degree to which the curve should be simplified and represents a minimum distance between line segments on the curve. It marks the start and end points of the curve as the first line segment (L), and then finds the point furthest from this initial line segment. If the distance from this point to the line segment (d) is less than $\epsilon$ then it is marked for removal. If the point is further than $\epsilon$ then it is kept and the algorithm recursively called with this point as the new end point. In this way the algorithm is able to remove every point that is closer than $\epsilon$ to the line segment that joins its neighbours.
 %
@@ -184,8 +261,7 @@ For more a more in depth explanation of the algorithm, see \cite{skeletonisation
   	\label{fig:douglas_peucker}
 \end{figure}
 %
-\noindent The RDP algorithm is used to reduce the number of points in the skeleton, simplifying it.
-However, it is only able to simplify curves with no bifurcations. This proves to be a problem when trying to simplify a skeleton produced by the skeltonisation algorithm, as it will always have bifurcations at the waist and neck. It may also also produce erroneous bifurcations at other points on the skeleton. These bifurcations can be seen in \textbf{\emph{figure \ref{fig:skel}}}.\\
+\noindent The RDP algorithm is used to reduce the number of points in the skeleton, simplifying it; however, it is only able to simplify curves with no bifurcations. This proves to be a problem when trying to simplify a skeleton produced by the skeltonisation algorithm, as it will always have bifurcations at the waist and neck. It may also also produce erroneous bifurcations at other points on the skeleton. These bifurcations can be seen in \textbf{\emph{figure \ref{fig:skel}}}.\\
 The location of these bifurcations can be detected by applying a modified version of condition $cB$ from the skeletonisation algorithm. Tp0 is calculated in the same way, by looking at the number of 0-1 transitions in the sequence p1, p2, ... , p8.
 %
 \begin{table}[h]
@@ -201,7 +277,7 @@ x &  & $\rightarrow$ &
 %
 \\If $Tp0 > 2$ then a bifurcation is present at p0.
 This is always true, as the skeletonisation algorithm ensures that the skeleton is a single pixel thick 8-connected component.\\
-Once the location of every bifurcation is found, the skeleton can be split into separate curves, by removing the bifurcation point. The RDP algorithm is then run on each of these curves independently. The simplified curves can then be recombined to form a simplified skeleton. At this point it is also possible the remove the false skeleton sections created by the skeletonisation algorithm forming erroneous bifurcations. The simplest way to do this is to delete any simplified skeleton section that is shorter than a given length. This works as the false skeleton sections tend to be shorter than the correct ones. A more reliable method for detecting false skeleton sections could be used in the final design.
+Once the location                               of every bifurcation is found, the skeleton can be split into separate curves, by removing the bifurcation point. The RDP algorithm is then run on each of these curves independently. The simplified curves can then be recombined to form a simplified skeleton. At this point it is also possible the remove the false skeleton sections created by the skeletonisation algorithm forming erroneous bifurcations. The simplest way to do this is to delete any simplified skeleton section that is shorter than a given length. This works as the false skeleton sections tend to be shorter than the correct ones. A more reliable method for detecting false skeleton sections could be used in the final design.
 %
 \begin{figure}[H]
 	\centering
@@ -219,14 +295,14 @@ Once the location of every bifurcation is found, the skeleton can be split into 
   		\label{fig:skel_src_mask}
 	\end{subfigure}\\
 	%
-	\begin{subfigure}{.5\textwidth}
+	\begin{subfigure}{\textwidth}
   		\centering
   		\includegraphics[width=.95\linewidth]{skel.jpg}
   		\caption{Result of skeletonisation function. Erroneous bifurcations are circled in red.}
   		\label{fig:skel}
-	\end{subfigure}%
+	\end{subfigure}\\
 	%
-	\begin{subfigure}{.5\textwidth}
+	\begin{subfigure}{\textwidth}
   		\centering
   		\includegraphics[width=.95\linewidth]{skel_reduced.jpg}
   		\caption{Result of skeleton simplification algorithm}
@@ -235,7 +311,28 @@ Once the location of every bifurcation is found, the skeleton can be split into 
 \caption{}
 \end{figure}
 %
-\section{Plan of Remaining Work}
+\section{Project Management}
+In order to properly manage the project, weekly meetings are conducted between the student and supervisor; progress and possible next steps are discussed.\\
+An initial Gantt chart was created in order to aid in time management \textbf{\emph{see apendix A}}. However, as the project progressed this Gantt chart was seen to be irrelevant and A new chart was produced. \\\\MUST WRITE NEW GANTT CHART\\\\
+	\subsection{Risk Management}
+	A risk assessment was carried out in order to assess potential problems, and how they could be prevented/ resolved.
+%
+\begin{table}[H]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+\textbf{\begin{tabular}[c]{@{}l@{}}Potential\\   Problem\end{tabular}}                                                                     & \textbf{Loss (1-5)} & \textbf{\begin{tabular}[c]{@{}l@{}}Probibility\\   (1-5)\end{tabular}} & \textbf{Risk} & \textbf{Plan}                                                                                                                                                                             \\ \hline
+\begin{tabular}[c]{@{}l@{}}Unable to get suitable\\ stock FS footage\end{tabular}                                                          & 4                   & 3                                                                      & 12            & \begin{tabular}[c]{@{}l@{}}Contact FS coaches to\\ ask for stock footage.\\ If this is not possible, record\\ a training session in the wind\\ tunnel with my 4-way FS team.\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}l@{}}Source code lost due to \\ home computer failure\end{tabular}                                                   & 5                   & 1                                                                      & 5             & \begin{tabular}[c]{@{}l@{}}All source code and project\\ documentation is backed up\\ on a private github repository.\end{tabular}                                                        \\ \hline
+Severe Illness                                                                                                                             & 4                   & 1                                                                      & 4             & \begin{tabular}[c]{@{}l@{}}Time is factored into the initial\\ Gantt chart in order to account\\ for unforeseen problems,\\ such as illness.\end{tabular}                                 \\ \hline
+\begin{tabular}[c]{@{}l@{}}Creating an active shape model\\ is more difficult and time \\ consuming than expected\end{tabular}             & 4                   & 3                                                                      & 12            & \begin{tabular}[c]{@{}l@{}}More time can be contributed\\ to the project, should this be\\ the case.\end{tabular}                                                                         \\ \hline
+\begin{tabular}[c]{@{}l@{}}Fitting a stick man model to a\\ skeleton is more difficult and \\ time consuming than expected\end{tabular}    & 4                   & 3                                                                      & 12            & \begin{tabular}[c]{@{}l@{}}More time can be contributed\\ to the project, should this be\\ the case.\end{tabular}                                                                         \\ \hline
+\begin{tabular}[c]{@{}l@{}}No project work is completed \\ during the exam period, and the\\   project falls behind sechedule\end{tabular} & 3                   & 4                                                                      & 12            & \begin{tabular}[c]{@{}l@{}}After the exam period, extra\\time can be contributed to\\the project.\end{tabular}                                                                          \\ \hline
+\end{tabular}%
+}
+\end{table}
+%
 %
 \emph{\\\\\\An enhanced project description (development of the brief above).\\
 A report on the background research and literature search.\\
@@ -259,6 +356,12 @@ A Gantt chart showing the schedule of both completed and remaining work}.\\
     Digital Image Processing -- Second Edition --- International Edition (2001),
     pg650-653
 %
+\bibitem{skeletonisation_simple}
+    Rafael C. Gonzalez \& Richard E. Woods,
+    "Skeletons",
+    Digital Image Processing -- Second Edition --- International Edition (2001),
+    pg543-545
+%
 \bibitem{binary_laplacian}
     Rafael C. Gonzalez \& Richard E. Woods,
     "The Laplacian",
@@ -276,11 +379,24 @@ A Gantt chart showing the schedule of both completed and remaining work}.\\
 	"Algorithms for the reduction of the number of points required to represent a 				digitized line or its caricature",
 	The Canadian Cartographer (1973),
 	pg112--–122
+%
+\bibitem{icl_pca}
+	Imperial College London,
+	"Lecture 15: Principal Component Analysis",
+	\url{www.doc.ic.ac.uk/~dfg/ProbabilisticInference/IDAPILecture15.pdf},
+	Last access: 09/12/2014
+%
+\bibitem{cootes}
+	Tim Cootes, E. R. Baldock, \& J. Graham,
+ 	"An introduction to active shape models.",
+ 	Image Processing and Analysis(2000),
+ 	pg223---248
 \end{thebibliography}
 %
+\clearpage
 \begin{appendices}
 %
-\chapter{Gantt Charts}
+\chapter{\textbf{A - Initial Gantt Chart}}
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\linewidth]{Gantt_initial_split.png}
