@@ -54,6 +54,11 @@ Contrary to popular belief, skydiving is a competitive and technical sport, requ
 \setcounter{page}{0}
 \tableofcontents
 \clearpage
+\thispagestyle{empty}
+\setcounter{page}{0}
+\listoffigures 
+\clearpage
+
 \section{Background}
 	\subsection{Formation Skydiving}
 Skydiving is a competitive and technical sport, requiring careful control of body position in order to move around the sky in a controlled manner whilst in free-fall.\\
@@ -163,7 +168,7 @@ In order for this to be done, a training set of points must be collected by hand
 \noindent A shape matrix can be created using the same format as the initial point matrix, but containing the coordinates of the aligned image points.
 Finally, principal component analysis is used to reduce the dimensions of the shape matrix. This is done by finding the eigenvalues and eigenvectors of the covariance matrix. A more in depth explanation can be found at \cite{icl_pca}.\\
 \\
-Using this method it is possible to find weather a skeleton of a skydiver is viable or not. This is done by creating the initial point matrix from a set of images of a skydiver in a variety of FS body positions. The resulting active shape model will contain information defining how a skydiver's body position can change. A set of test points that make up the skydivers skeleton \textbf{\emph{(see figure \ref{fig:stick_model_fitted})}} can then be compared to this model to find if the skeleton is possible or not. This allows the skeleton to be recalculated, should it be found to be impossible.
+Using this method it is possible to find weather a skeleton of a skydiver is viable or not. This is done by creating the initial point matrix from a set of images of a skydiver in a variety of FS body positions. The resulting active shape model will contain information defining how a skydiver's body position can change. A set of test points that make up the skydiver's skeleton \textbf{\emph{(see figure \ref{fig:stick_model_fitted})}} can then be compared to this model to find if the skeleton is possible or not. This allows the skeleton to be recalculated, should it be found to be impossible.
 %
 \section{Proposed Final Design}
 %
@@ -180,7 +185,7 @@ The proposed final design will take the form of a command line tool. It will tak
 %
 \section{Completed Work}
 	\subsection{Data Collection}
-	Software has been written that handles collection of data for the initial point 			matrix to be used to create the point distribution model. In order to speed up data collection, the program displays an image of a skydiver and asks the user to left click on different parts of the skydivers body. The user can undo the last point by right clicking. Once all the points for the image are recorded, they are written to an output file and form the next row of the initial point matrix. Another image is then shown and the process repeats. This is a console based application and takes the file path of an image list as its only input \textbf{\emph{(see figure \ref{fig:data_collection})}}. This image list is stored in an XML file, as OpenCV natively supports input and output to XML files. For each image, the program adds another row to the initial point matrix \textbf{\emph{(see figure \ref{fig:shape_matrix})}}. Currently only 10 images have been used to create the initial point matrix, but this number will be increased before it is used to create the point distribution model.
+	Software has been written that handles collection of data for the initial point 			matrix to be used to create the point distribution model. In order to speed up data collection, the program displays an image of a skydiver and asks the user to left click on different parts of the skydiver's body. The user can undo the last point by right clicking. Once all the points for the image are recorded, they are written to an output file and form the next row of the initial point matrix. Another image is then shown and the process repeats. This is a console based application and takes the file path of an image list as its only input \textbf{\emph{(see figure \ref{fig:data_collection})}}. This image list is stored in an XML file, as OpenCV natively supports input and output to XML files. For each image, the program adds another row to the initial point matrix \textbf{\emph{(see figure \ref{fig:shape_matrix})}}. Currently only 10 images have been used to create the initial point matrix, but this number will be increased before it is used to create the point distribution model.
 %
 \begin{figure}[H]
 	\centering
@@ -306,7 +311,7 @@ Once the location                               of every bifurcation is found, t
   		\caption{Result of skeleton simplification algorithm}
   		\label{fig:skel_reduced}
 	\end{subfigure}
-\caption{}
+\caption{Results of skeletonisation and simplification algorithms.}
 \end{figure}
 %
 \subsubsection{Background Subtraction}
