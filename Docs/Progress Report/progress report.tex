@@ -48,7 +48,7 @@ MEng Electronic Engineering\\}
 \thispagestyle{empty}
 \setcounter{page}{0}
 \begin{abstract}\textbf{\emph{
-Contrary to popular belief, skydiving is a competitive and technical sport, requiring careful control of body position in order to not only remain stable, but also to move around the sky in free-fall. A popular discipline in competitive skydiving is formation skydiving, where a group of skydivers form set shapes with their bodies whilst in free-fall. It is proposed that a software tool will be written that is able to automatically judge video footage of formation skydiving competitions. This is done by analysing the pose of each skydiver individually, in order to fit a stick man model. The interaction between these models is then used to find the overall shape of the formation, enabling formation detection. The final goal is to use this tool to remove the need for manual competition judging.
+Contrary to popular belief, skydiving is a competitive and technical sport, requiring careful control of body position in order to not only remain stable, but also to move around the sky in free-fall. A popular discipline in competitive skydiving is formation skydiving, where a group of skydivers form set shapes with their bodies whilst in free-fall. This Report proposes a software tool to be written; able to automatically judge  formation skydiving footage. This will be done detecting the pose of each skydiver in the formation individually; this information will then be used to find the overall shape of the formation. This tool will combine and extend well established computer vision methods such as Active Shape Models, skeletonisation. The ultimate goal is to remove the need for manual competition judging, switching to a fully automated system.
 }}\end{abstract}
 \keywords{computer vision, video analysis, formation skydiving, posture detection}
 \clearpage
@@ -149,9 +149,16 @@ These libraries are platform independent; this should ensure that the program is
 \section{Literature Report}
 %
 Due to the specialist nature of the project, relevant existing literature is somewhat limited.
-However, there does exist literature relevant to active shape models\cite{cootes} and posture recognition.
+However, there does exist relevant literature on various methods for human posture recognition.
+
+\subsection{Posture Detection}
+%
+Human pose detection can be a difficult problem to tackle; many factors contribute towards this, such as shadows, occlusions, complicated backgrounds and noisy source images.\\
+There are many different proposed methods to tackle the task of human posture detection; over a wide variety of technologies. Some methods use depth cues extracted from 3d scanner information, such as \cite{kinect_IR} which uses a Microsoft Kinect to detect the human body. Other methods are designed to work with video\cite{video}, creating a 3d estimation of human pose in order to detect people. A common goal is to try to detect the pose of a person from a single static image. There are a variety of ways of doing this such as, using a model-based method, where an explicit pose model must be specified, often requiring complicated 3d modelling and rendering\cite{model-based}. Another method used relies on texture cues in order to perform "Parts-based" object detection\cite{monocular_still_images}, this method neither uses an explicit model, or pre-labelled data.\\
+However, the method that is deemed to most fit goal of recognising the pose of a skydiver is an adaptive method, such as Active Shape Models. Active Shape Models are more often used in facial feature detection\cite{cootes}\cite{face_recognition}; given that it only relies on a set of simple points, labelled from a set of training images it should be ideal for the task at hand.
+%
 \subsection{Active Shape Models}
-Active shape models are statistical shape models that are able iteratively deform in order to fit a given example image. They can also be used to characterise the ways in which a set of points in an image can move. Using principal component analysis\cite{icl_pca}, it is possible to find a minimal set of feature variables which control the overall shape of an object. Varying these enables every possible permutation of the set of image points to be found.\\
+Active Shape Models are statistical shape models that are able iteratively deform in order to fit a given example image. They can also be used to characterise the ways in which a set of points in an image can move. Using principal component analysis\cite{icl_pca}, it is possible to find a minimal set of feature variables which control the overall shape of an object. Varying these enables every possible permutation of the set of image points to be found.\\
 In order for this to be done, a training set of points must be collected by hand from images similar to those that will be analysed. This This training set of points forms the initial point matrix.
 %
 \begin{figure}[H]
@@ -166,7 +173,7 @@ In order for this to be done, a training set of points must be collected by hand
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\linewidth]{generalised_procrastes_ananlysis.png}
-	\caption{Performing generalised procrustes analysis on three shapes}
+	\caption{Performing generalised procrustes analysis on three shapes.}
 	\label{fig:procrastes}
 \end{figure}
 %
@@ -175,15 +182,10 @@ Finally, principal component analysis is used to reduce the dimensions of the sh
 \\
 Using this method it is possible to find weather a skeleton of a skydiver is viable or not. This is done by creating the initial point matrix from a set of images of a skydiver in a variety of FS body positions. The resulting active shape model will contain information defining how a skydiver's body position can change. A set of test points that make up the skydiver's skeleton \textbf{\emph{(see figure \ref{fig:stick_model_fitted})}} can then be compared to this model to find if the skeleton is possible or not. This allows the skeleton to be recalculated, should it be found to be impossible.
 %
-\subsection{Posture Recognition}
-%
-Human pose detection can be a difficult problem to tackle; many factors contribute towards this, such as shading, occlusions and low image quality.\\
-Existing techniques fall into two main categories, model-based and learning-based algorithms. Model-based algorithms assume some explicit prior knowledge of a body model, often requiring accurate 3D modelling and rendering. Learning-based algorithms attempt to remove this need often by iteratively collecting data and using that to create a model.
-
 %
 \section{Proposed Final Design}
 %
-The proposed final design will take the form of a command line tool. It will take the path to a video of formation skydiving to be analysed as an argument. It will output the  video file, but with an overlay showing which (if any) formations have been made at each stage in the video. It will also highlight the skeletons of the skydivers in different colours in order to show which slot in the formation they are flying. The skeletons will take the same colours as in \textbf{\emph{figure \ref{fig:fs_dive_pool}}}. Time permitting, a GUI may be implemented for the command line tool in order to make the software more user friendly.\\
+The proposed final design will take the form of a command line tool. It will take the path to a video of formation skydiving to be analysed as an argument. It's output will be a similar video file, but with an overlay showing which (if any) formations have been made at each stage in the video. It will also highlight the skeletons of the skydivers in different colours in order to show which slot in the formation they are flying. The skeletons will take the same colours as in \textbf{\emph{figure \ref{fig:fs_dive_pool}}}. Time permitting, a GUI may be implemented for the command line tool in order to make the software more user friendly.\\
 \\
 Given that the project is entirely software based, additional support towards the project should not be necessary.
 \subsection{Flow Chart}
@@ -299,14 +301,14 @@ Once the location                               of every bifurcation is found, t
 	\begin{subfigure}{.5\textwidth}
   		\centering
   		\includegraphics[width=.95\linewidth]{skel_src.jpg}
-  		\caption{Skeletonisation source image}
+  		\caption{Skeletonisation source image.}
   		\label{fig:skel_src}
 	\end{subfigure}%
 	%
 	\begin{subfigure}{.5\textwidth}
   		\centering
   		\includegraphics[width=.95\linewidth]{skel_src_mask.jpg}
-  		\caption{Binary mask of source image}
+  		\caption{Binary mask of source image.}
   		\label{fig:skel_src_mask}
 	\end{subfigure}\\
 	%
@@ -320,7 +322,7 @@ Once the location                               of every bifurcation is found, t
 	\begin{subfigure}{\textwidth}
   		\centering
   		\includegraphics[width=\linewidth]{skel_reduced.jpg}
-  		\caption{Result of skeleton simplification algorithm}
+  		\caption{Result of skeleton simplification algorithm.}
   		\label{fig:skel_reduced}
 	\end{subfigure}
 \caption{Results of skeletonisation and simplification algorithms.}
@@ -424,14 +426,37 @@ on Single Images",
 	\url{http://docs.opencv.org/opencv2refman.pdf},
 	Last access: 09 Dec 2014
 %
-\bibitem{Qt}
-	Qt Project,
-	"Qt Reference Pages",
-	QtDoc 5.3,
-	\url{http://docs.opencv.org/opencv2refman.pdf},
-	Last access: 09 Dec 2014
-\end{thebibliography}
+\bibitem{monocular_still_images}
+	Wachs, Juan P., Deborah Goshorn, and Mathias Kolsch,
+	"Recognizing human postures and poses in monocular still images."(2009),
 %
+\bibitem{kinect_IR}
+	Lu Xia, Chia-Chih Chen, Aggarwal, J.K.,
+	"Human detection using depth information by Kinect,"
+	Computer Vision and Pattern Recognition Workshops (CVPRW),
+	2011 IEEE Computer Society Conference on , vol.,
+	no., pp.15,22, 20-25 June 2011
+doi: 10.1109/CVPRW.2011.5981811
+%
+\bibitem{video}
+	Yu Tsz-Ho, Tae-Kyun Kim, and Roberto Cipolla,
+	"Unconstrained monocular 3d human pose estimation by action detection and cross-			modality regression forest.",
+	In Computer Vision and Pattern Recognition (CVPR),
+	2013 IEEE Conference on, pp. 3642-3649. IEEE, 2013.
+%
+\bibitem{model-based}
+Christophe Doignon (2007),
+An Introduction to Model-Based Pose Estimation and 3-D Tracking Techniques,
+Scene Reconstruction Pose Estimation and Tracking, Rustam Stolkin (Ed.), ISBN: 978-3-902613-06-6, InTech, pg360-376,
+Available from:
+\url{http://www.intechopen.com/books/scene_reconstruction_pose_estimation_and_tracking/an_introduction_to_m
+odel-based_pose_estimation_and_3-d_tracking_techniques}
+%
+\bibitem{face_recognition}
+Prabhu, Utsav, and Keshav Seshadri,
+"Facial Recognition Using Active Shape Models, Local Patches and Support Vector Machines."
+%
+\end{thebibliography}
 \clearpage
 \begin{appendices}
 %
