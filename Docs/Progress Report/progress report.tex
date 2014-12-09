@@ -11,6 +11,8 @@
 %
 %\geometry{bindingoffset=35mm}
 
+\providecommand{\keywords}[1]{\textbf{\textit{Keywords ---}} #1}
+
 \begin{document}
 
 \begin{titlepage}
@@ -46,8 +48,9 @@ MEng Electronic Engineering\\}
 \thispagestyle{empty}
 \setcounter{page}{0}
 \begin{abstract}\textbf{\emph{
-Contrary to popular belief, skydiving is a competitive and technical sport, requiring careful control of body position in order to not only remain stable, but also to move around the sky in free-fall. A popular discipline in competitive skydiving is formation skydiving, where a group of skydivers form set shapes with their bodies whilst in free-fall. It is proposed that a software tool will be written that is able to judge formation skydiving competitions fully automatically, potentially removing the need for manual judging.
+Contrary to popular belief, skydiving is a competitive and technical sport, requiring careful control of body position in order to not only remain stable, but also to move around the sky in free-fall. A popular discipline in competitive skydiving is formation skydiving, where a group of skydivers form set shapes with their bodies whilst in free-fall. It is proposed that a software tool will be written that is able to automatically judge video footage of formation skydiving competitions. This is done by analysing the pose of each skydiver individually, in order to fit a stick man model. The interaction between these models is then used to find the overall shape of the formation, enabling formation detection. The final goal is to use this tool to remove the need for manual competition judging.
 }}\end{abstract}
+\keywords{computer vision, video analysis, formation skydiving, posture detection}
 \clearpage
 %
 \thispagestyle{empty}
@@ -142,10 +145,12 @@ The original focus of the project was to analyse video of dirt diving and identi
 If a graphical user interface (GUI) were to be implemented, the open source GUI library Qt 5.3\cite{Qt} would be used.
 These libraries are platform independent; this should ensure that the program is not tied to any single operating system.
 %
+
 \section{Literature Report}
 %
 Due to the specialist nature of the project, relevant existing literature is somewhat limited.
-However, there does exist literature relevant to active shape models\cite{cootes}; an important component of the project.
+However, there does exist literature relevant to active shape models\cite{cootes} and posture recognition.
+\subsection{Active Shape Models}
 Active shape models are statistical shape models that are able iteratively deform in order to fit a given example image. They can also be used to characterise the ways in which a set of points in an image can move. Using principal component analysis\cite{icl_pca}, it is possible to find a minimal set of feature variables which control the overall shape of an object. Varying these enables every possible permutation of the set of image points to be found.\\
 In order for this to be done, a training set of points must be collected by hand from images similar to those that will be analysed. This This training set of points forms the initial point matrix.
 %
@@ -170,9 +175,17 @@ Finally, principal component analysis is used to reduce the dimensions of the sh
 \\
 Using this method it is possible to find weather a skeleton of a skydiver is viable or not. This is done by creating the initial point matrix from a set of images of a skydiver in a variety of FS body positions. The resulting active shape model will contain information defining how a skydiver's body position can change. A set of test points that make up the skydiver's skeleton \textbf{\emph{(see figure \ref{fig:stick_model_fitted})}} can then be compared to this model to find if the skeleton is possible or not. This allows the skeleton to be recalculated, should it be found to be impossible.
 %
+\subsection{Posture Recognition}
+%
+Human pose detection can be a difficult problem to tackle; many factors contribute towards this, such as shading, occlusions and low image quality.\\
+Existing techniques fall into two main categories, model-based and learning-based algorithms. Model-based algorithms assume some explicit prior knowledge of a body model, often requiring accurate 3D modelling and rendering. Learning-based algorithms attempt to remove this need often by iteratively collecting data and using that to create a model.
+
+%
 \section{Proposed Final Design}
 %
 The proposed final design will take the form of a command line tool. It will take the path to a video of formation skydiving to be analysed as an argument. It will output the  video file, but with an overlay showing which (if any) formations have been made at each stage in the video. It will also highlight the skeletons of the skydivers in different colours in order to show which slot in the formation they are flying. The skeletons will take the same colours as in \textbf{\emph{figure \ref{fig:fs_dive_pool}}}. Time permitting, a GUI may be implemented for the command line tool in order to make the software more user friendly.\\
+\\
+Given that the project is entirely software based, additional support towards the project should not be necessary.
 \subsection{Flow Chart}
 %
 \begin{figure}[H]
@@ -281,7 +294,6 @@ x &  & $\rightarrow$ &
 \\If $Tp0 > 2$ then a bifurcation is present at p0.
 This is always true, as the skeletonisation algorithm ensures that the skeleton is a single pixel thick 8-connected component.\\
 Once the location                               of every bifurcation is found, the skeleton can be split into separate curves, by removing the bifurcation point. The RDP algorithm is then run on each of these curves independently. The simplified curves can then be recombined to form a simplified skeleton. At this point it is also possible the remove the false skeleton sections created by the skeletonisation algorithm forming erroneous bifurcations. The simplest way to do this is to delete any simplified skeleton section that is shorter than a given length. This works as the false skeleton sections tend to be shorter than the correct ones. A more reliable method for detecting false skeleton sections could be used in the final design.
-%
 \begin{figure}[H]
 	\centering
 	\begin{subfigure}{.5\textwidth}
@@ -395,6 +407,20 @@ Severe Illness                                                                  
 	OpenCV,
 	"The OpenCV Reference Manual
 	Release 2.4.9.0"(April 21, 2014),
+	\url{http://docs.opencv.org/opencv2refman.pdf},
+	Last access: 09 Dec 2014
+%
+\bibitem{Qt}
+	Qt Project,
+	"Qt Reference Pages",
+	QtDoc 5.3,
+	\url{http://docs.opencv.org/opencv2refman.pdf},
+	Last access: 09 Dec 2014
+%
+\bibitem{2d_pose_detection}
+	"Automatic Detection of 2D Human Postures Based
+on Single Images",
+	QtDoc 5.3,
 	\url{http://docs.opencv.org/opencv2refman.pdf},
 	Last access: 09 Dec 2014
 %

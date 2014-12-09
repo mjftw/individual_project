@@ -4,6 +4,8 @@
 \contentsline {subsubsection}{\numberline {1.1.2}Training Practices}{1}{subsubsection.1.1.2}
 \contentsline {subsection}{\numberline {1.2}Project Brief}{2}{subsection.1.2}
 \contentsline {section}{\numberline {2}Literature Report}{5}{section.2}
+\contentsline {subsection}{\numberline {2.1}Active Shape Models}{5}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Posture Recognition}{6}{subsection.2.2}
 \contentsline {section}{\numberline {3}Proposed Final Design}{6}{section.3}
 \contentsline {subsection}{\numberline {3.1}Flow Chart}{7}{subsection.3.1}
 \contentsline {section}{\numberline {4}Completed Work}{7}{section.4}
