@@ -1,7 +1,11 @@
 #include <iostream>
+#include <vector>
+#include <algorithm>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/video/background_segm.hpp>
+#include <opencv2/video/video.hpp>
 
 using namespace std;
 using namespace cv;
@@ -9,15 +13,19 @@ using namespace cv;
 #define WHITE 255
 #define BLACK 0
 
+#define ROWS 360
+#define COLS 480
+
 void edge_detect(Mat& src, Mat& dst);
 void find_skeleton(Mat& src, Mat& dst); //Simple morphological skeletonisation
 void find_skeleton_connected(Mat& src, Mat& dst); //Medial Axis Transformation skeletonisation method, taken from Digital Image Processing book, pg650-653
 void edge_detect(Mat& src, Mat& dst);
 vector<vector<Point> > reduce_points(Mat& src, Mat& dst, float epsilon, float sizeTol = 0.3); //uses Ramer–Douglas–Peucker algorithm
+void sub_vid_bg(VideoCapture& src, VideoCapture& dst);
 
 void find_skeleton(Mat& src, Mat& dst)
 {
-    // Using morphological method
+    // Using morphological method (bad)
     Mat skel(src.size(), CV_8UC1, Scalar(BLACK));
     Mat temp(src.size(), CV_8UC1);
     Mat element = getStructuringElement(MORPH_CROSS, cv::Size(3, 3));
@@ -273,3 +281,139 @@ vector<vector<Point> > reduce_points(Mat& src, Mat& dst, float epsilon, float si
     dst = temp2.clone();
     return lineSegsReduced;
 }
+
+void sub_vid_bg(VideoCapture& src, VideoCapture& dst)
+{
+    BackgroundSubtractorMOG2 mog;
+    Mat frame, fg_mask, fg_mask_opn;
+    int morph_size = 1;
+    Mat element = getStructuringElement(MORPH_ELLIPSE, Size(2*morph_size+1, 2*morph_size+1), Point(morph_size, morph_size));
+
+    namedWindow("frame", WINDOW_NORMAL);
+    namedWindow("fg_mask", WINDOW_NORMAL);
+    namedWindow("fg_mask_opn", WINDOW_NORMAL);
+
+    for(src.read(frame); src.read(frame);)
+    {
+        imshow("frame", frame);
+        mog(frame, fg_mask);
+        threshold(fg_mask, fg_mask, 1, WHITE, THRESH_BINARY);
+        morphologyEx(fg_mask, fg_mask_opn, MORPH_OPEN, element);
+
+        imshow("fg_mask", fg_mask);
+        imshow("fg_mask_opn", fg_mask_opn);
+
+        waitKey(0);
+    }
+
+    return;
+}
+
+bool vec_sort(uchar i,uchar j){return (i<j);}
+
+//void compute_bg_img(VideoCapture& src, Mat& dst, int n_sample_frames)
+//{
+//    Mat frame;
+//    vector<Mat> sample_frames;
+//    float scale_factor = 1;
+//
+//    src.read(frame);
+//    resize(frame, frame, Size(0,0), scale_factor, scale_factor);
+//    Mat bg_img(frame.size(), CV_8UC3, Scalar(0));
+//    int rows = frame.rows;
+//    int cols = frame.cols;
+//
+//    int i=0;
+//    for(src.read(frame); src.read(frame);)
+//    {
+//        if(i%n_sample_frames == 0)
+//        {
+//            resize(frame, frame, Size(0,0), scale_factor, scale_factor);
+//            sample_frames.push_back(frame);
+//        }
+//        i++;
+//    }
+//
+//  ///*Only psudocode*/
+//    vector<uchar> pixVals;
+//    vec3 median;
+//
+//    for(i=0; i<rows; i++)
+//        for(int j=0; j<rows; j++)
+//        {
+//            pixVals.clear();
+//            for(int k=0; k<sample_frames.size(); k++)
+//            {
+//                pixVals.push_back(sample_frames[i][j]);
+//            }
+//            sort(pixVals, pixVals, vec_sort);
+//            bg_img[j][k] = median;
+//        }
+//
+//    dst = bg_img.clone();
+//}
+
+void getHist(list<uchar>& prev_n_pixels, unsigned int* hist)
+{
+    for(int i=0; i<255; i++)
+        hist[i] = 0;
+
+    for(list<uchar>::const_iterator it = prev_n_pixels.begin(); it!=prev_n_pixels.end(); it++)
+    {
+        hist[*it]++;
+    }
+}
+
+void extract_fg(Mat& frame, Mat& fg_mask, int N) //N must be odd
+{///implementation of algorithm "medhist_bnd(D)" from paper "Speed Up Temporal Median Filter for Background Subtraction"
+ ///Mao-Hsiung Hung, Jeng-Shyang Pan, Chaur-Heh Hsieh (2010)
+    cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
+    resize(frame, frame, Size(ROWS,COLS), 0 ,0); //resize frame
+
+    static list<uchar> prev_frames[ROWS][COLS];
+    Mat median(frame.size(), CV_8UC1, Scalar(255));
+    int O_mid = (N-1)/2;
+
+    if(prev_frames[0][0].empty()) //initial resize of lists
+    {
+        cout << "in resize func" << endl;
+        for(int i=0; i<ROWS; i++)
+            for(int j=0; j<COLS; j++)
+            {
+                prev_frames[i][j].resize(N);
+            }
+    }
+
+    for(int i=0; i<ROWS; i++)
+        for(int j=0; j<COLS; j++)
+        {
+            prev_frames[i][j].push_front(frame.at<uchar>(i,j));
+            prev_frames[i][j].pop_back();
+
+            int csum = 0;
+            unsigned int hn[256];
+            getHist(prev_frames[i][j], hn);
+
+            int k;
+            for(k=0; k<255; k++)
+            {
+                if(hn[k]>0)
+                    csum += hn[k];
+                if(csum>=O_mid)
+                    break;
+            }
+            median.at<uchar>(i,j) = k;
+
+        }
+        fg_mask = median.clone();
+
+}
+
+
+
+
+
+
+
+
+
