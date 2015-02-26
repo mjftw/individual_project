@@ -8,8 +8,8 @@
 #define SRC_VID_DIR (std::string)"../Data/src/vid/"
 #define OUT_DIR (std::string)"../Data/out/"
 
-//#define FCC CV_FOURCC('P','I','M','1') //MPEG-1 codec
-#define FCC 0 //uncompressed
+#define FCC CV_FOURCC('P','I','M','1') //MPEG-1 codec compression
+//#define FCC 0 //uncompressed
 
 using namespace std;
 using namespace cv;
@@ -18,8 +18,8 @@ int main()
 {
 
     //string src_img_path = "Data/Pictures/bp9_mask.tif";
-    //string src_vid_name = "alphabet_dive";
-    string src_vid_name = "4-way_fs_dive-pool";
+    string src_vid_name = "alphabet_dive";
+    //string src_vid_name = "4-way_fs_dive-pool";
 
     Mat src_img, dst;
     VideoCapture srcVid(SRC_VID_DIR + src_vid_name + ".avi"), dstVid;
@@ -63,9 +63,6 @@ int main()
 
         find_skeleton_connected(temp, temp);
         outVid_skel << temp;
-
-        //imshow("fg", temp);
-        //waitKey(10);
     }
 
 

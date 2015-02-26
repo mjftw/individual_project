@@ -12,7 +12,7 @@ using namespace cv;
 
 #define WHITE 255
 #define BLACK 0
-#define SCALE_FACTOR 0.25
+#define SCALE_FACTOR 0.5
 
 void edge_detect(Mat& src, Mat& dst);
 void find_skeleton(Mat& src, Mat& dst); //Simple morphological skeletonisation
@@ -351,15 +351,13 @@ bool vec_sort(uchar i,uchar j){return (i<j);}
 //    dst = bg_img.clone();
 //}
 
-void getHist(list<uchar>& prev_n_pixels, unsigned int* hist)
+void getHist(uchar* prev_n_pixels,int arry_length, unsigned int* hist)
 {
     for(int i=0; i<255; i++)
         hist[i] = 0;
 
-    for(list<uchar>::const_iterator it = prev_n_pixels.begin(); it!=prev_n_pixels.end(); it++)
-    {
-        hist[*it]++;
-    }
+    for(int i=0; i<arry_length; i++)
+        hist[prev_n_pixels[i]]++;
 }
 
 void extract_bg(VideoCapture& srcVid, Mat& bg, int nth_frame)
@@ -367,40 +365,48 @@ void extract_bg(VideoCapture& srcVid, Mat& bg, int nth_frame)
     cout << "Calculating background image..." << endl;
     Mat frame;
 
-    int rows = srcVid.get(CV_CAP_PROP_FRAME_HEIGHT) * SCALE_FACTOR;
-    int cols = srcVid.get(CV_CAP_PROP_FRAME_WIDTH) * SCALE_FACTOR;
+    const int rows = srcVid.get(CV_CAP_PROP_FRAME_HEIGHT) * SCALE_FACTOR;
+    const int cols = srcVid.get(CV_CAP_PROP_FRAME_WIDTH) * SCALE_FACTOR;
+    const int n_frames = srcVid.get(CV_CAP_PROP_FRAME_COUNT);
+    const int n_frames_used_q = div(n_frames, nth_frame).quot;
+    const int n_frames_used_r = div(n_frames, nth_frame).rem;
 
-    list<uchar> prev_frames[rows][cols];
+    cout << "Using maximum " << n_frames_used_q << " of " << n_frames << " frames at " << cols << "x" << rows << " resolution" << endl;
 
-    int i=0, j=0;
-    for(srcVid.read(frame); srcVid.read(frame); i++)
+    uchar*** prev_frames = new uchar**[rows];
+    for(int i=0; i<rows; i++)
     {
-        if(i%nth_frame == 0)
-        {
-            cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
-            resize(frame, frame, Size(0,0), SCALE_FACTOR ,SCALE_FACTOR); //resize frame
-
-            for(int i=0; i<rows; i++)
-                for(int j=0; j<cols; j++)
-                    prev_frames[i][j].push_back(frame.at<uchar>(i,j));
-        }
-
+        prev_frames[i] = new uchar*[cols];
+        for(int j=0; j<cols; j++)
+            prev_frames[i][j] = new uchar[n_frames_used_q];
     }
 
-    int N = prev_frames[0][0].size();
-    cout << "number of frames to look at: " << N << endl;
+    int k=0;
+    for(srcVid.read(frame); srcVid.read(frame); k++)
+    {
+        cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
+        resize(frame, frame, Size(cols,rows), 0 ,0); //resize frame
+
+        for(int i=0; i<rows; i++)
+            for(int j=0; j<cols; j++)
+                prev_frames[i][j][k] = frame.at<uchar>(i,j);
+        srcVid.set(CV_CAP_PROP_POS_FRAMES, srcVid.get(CV_CAP_PROP_POS_FRAMES) + n_frames_used_r);
+    }
+
+    int N = k;
+    cout << "Calculating background image using " << N << " frames..." << endl;
 
     Mat median(rows, cols, CV_8UC1, Scalar(255));
 
-    for(i=0; i<rows; i++)
-        for(j=0; j<cols; j++)
+    for(int i=0; i<rows; i++)
+        for(int j=0; j<cols; j++)
         {///implementation of algorithm "medhist_bnd(D)" from paper "Speed Up Temporal Median Filter for Background Subtraction"
         ///Mao-Hsiung Hung, Jeng-Shyang Pan, Chaur-Heh Hsieh (2010)
 
             int O_mid = (N%2 == 0)? (N/2):(N-1)/2;
             int csum = 0;
             unsigned int hn[256];
-            getHist(prev_frames[i][j], hn);
+            getHist(prev_frames[i][j], N, hn);
 
             int k;
             for(k=0; k<255; k++)
@@ -423,6 +429,15 @@ void extract_bg(VideoCapture& srcVid, Mat& bg, int nth_frame)
 
 
     bg = median.clone();
+
+    for(int i=0; i<rows; i++)
+    {
+        for(int j=0; j<cols; j++)
+            delete prev_frames[i][j];
+        delete prev_frames[i];
+    }
+    delete prev_frames;
+
 }
 
 
