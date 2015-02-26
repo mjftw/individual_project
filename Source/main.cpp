@@ -5,32 +5,73 @@
 #include <opencv2/video/background_segm.hpp>
 #include "libs.h"
 
+#define SRC_VID_DIR (std::string)"../Data/src/vid/"
+#define OUT_DIR (std::string)"../Data/out/"
+
+//#define FCC CV_FOURCC('P','I','M','1') //MPEG-1 codec
+#define FCC 0 //uncompressed
+
 using namespace std;
 using namespace cv;
 
 int main()
 {
 
-    string src_img_path = "Data/Pictures/bp9_mask.tif";
-    string src_vid_path = "../Data/src/vid/4-way_fs_dive-pool.avi";
+    //string src_img_path = "Data/Pictures/bp9_mask.tif";
+    //string src_vid_name = "alphabet_dive";
+    string src_vid_name = "4-way_fs_dive-pool";
+
     Mat src_img, dst;
-    VideoCapture srcVid(src_vid_path), dstVid;
+    VideoCapture srcVid(SRC_VID_DIR + src_vid_name + ".avi"), dstVid;
+    VideoWriter outVid_fg, outVid_skel, outVid_fgbgDiff;
 
-    Mat frame, fg_mask;
+    Mat frame, temp, bg;
 
-    int i=0;
-    for(srcVid.read(frame); srcVid.read(frame); i++)
+    extract_bg(srcVid, bg, 10); //use every 10th frame
+
+    namedWindow("background image", WINDOW_NORMAL);
+    imshow("background image", bg);
+    imwrite(OUT_DIR + src_vid_name + "_bg.png", bg);
+
+    srcVid.set(CV_CAP_PROP_POS_AVI_RATIO, 0); //reset srcVid
+
+    Size srcSize = Size((int)(srcVid.get(CV_CAP_PROP_FRAME_WIDTH) * SCALE_FACTOR), (int)(srcVid.get(CV_CAP_PROP_FRAME_HEIGHT)) * SCALE_FACTOR);
+
+    outVid_fg.open(OUT_DIR + src_vid_name + "_fg.avi", FCC, srcVid.get(CV_CAP_PROP_FPS), srcSize, 0);
+    outVid_skel.open(OUT_DIR + src_vid_name + "_skel.avi", FCC, srcVid.get(CV_CAP_PROP_FPS), srcSize, 0);
+    outVid_fgbgDiff.open(OUT_DIR + src_vid_name + "_fgbgDiff.avi", FCC, srcVid.get(CV_CAP_PROP_FPS), srcSize, 0);
+
+    if((!outVid_fg.isOpened()) || (!outVid_skel.isOpened()) || (!outVid_fgbgDiff.isOpened()))
+        cerr << endl << "Could not open output video(s) for writing." << endl;
+    else
+        cout << endl << "Writing videos..." << endl;
+
+
+    int morph_size = 1;
+    Mat element = getStructuringElement(2, Size(2*morph_size+1, 2*morph_size+1), Point(morph_size, morph_size));
+
+    for(srcVid.read(frame); srcVid.read(frame);)
     {
-        if(i%10 == 0)
-            extract_fg(frame, fg_mask, 20);
-        waitKey(1);
+        cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
+        resize(frame, frame, Size(0,0), SCALE_FACTOR, SCALE_FACTOR); //resize frame
+        temp = cv::abs(frame - bg);
+        outVid_fgbgDiff << temp;
+
+        threshold(temp, temp, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU); //Adaptive thresholding
+        dilate(temp, temp, element);
+        outVid_fg << temp;
+
+        find_skeleton_connected(temp, temp);
+        outVid_skel << temp;
+
+        //imshow("fg", temp);
+        //waitKey(10);
     }
-    namedWindow("bg", WINDOW_NORMAL);
-    imshow("bg", fg_mask);
 
 
-    //sub_vid_bg(srcVid, dstVid);
-    //cout << "After bg sub." << endl;
+
+//    sub_vid_bg(srcVid, dstVid);
+//    cout << "After bg sub." << endl;
 
 //      Mat bg_img = imread();
 //    compute_bg_img(srcVid, bg_img, 100);

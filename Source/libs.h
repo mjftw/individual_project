@@ -12,9 +12,7 @@ using namespace cv;
 
 #define WHITE 255
 #define BLACK 0
-
-#define ROWS 360
-#define COLS 480
+#define SCALE_FACTOR 0.25
 
 void edge_detect(Mat& src, Mat& dst);
 void find_skeleton(Mat& src, Mat& dst); //Simple morphological skeletonisation
@@ -284,9 +282,9 @@ vector<vector<Point> > reduce_points(Mat& src, Mat& dst, float epsilon, float si
 
 void sub_vid_bg(VideoCapture& src, VideoCapture& dst)
 {
-    BackgroundSubtractorMOG2 mog;
+    BackgroundSubtractorMOG mog(300,10,0.9);
     Mat frame, fg_mask, fg_mask_opn;
-    int morph_size = 1;
+    int morph_size = 3;
     Mat element = getStructuringElement(MORPH_ELLIPSE, Size(2*morph_size+1, 2*morph_size+1), Point(morph_size, morph_size));
 
     namedWindow("frame", WINDOW_NORMAL);
@@ -303,7 +301,7 @@ void sub_vid_bg(VideoCapture& src, VideoCapture& dst)
         imshow("fg_mask", fg_mask);
         imshow("fg_mask_opn", fg_mask_opn);
 
-        waitKey(0);
+        waitKey(1);
     }
 
     return;
@@ -364,32 +362,42 @@ void getHist(list<uchar>& prev_n_pixels, unsigned int* hist)
     }
 }
 
-void extract_fg(Mat& frame, Mat& fg_mask, int N) //N must be odd
-{///implementation of algorithm "medhist_bnd(D)" from paper "Speed Up Temporal Median Filter for Background Subtraction"
- ///Mao-Hsiung Hung, Jeng-Shyang Pan, Chaur-Heh Hsieh (2010)
-    cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
-    resize(frame, frame, Size(ROWS,COLS), 0 ,0); //resize frame
+void extract_bg(VideoCapture& srcVid, Mat& bg, int nth_frame)
+{
+    cout << "Calculating background image..." << endl;
+    Mat frame;
 
-    static list<uchar> prev_frames[ROWS][COLS];
-    Mat median(frame.size(), CV_8UC1, Scalar(255));
-    int O_mid = (N-1)/2;
+    int rows = srcVid.get(CV_CAP_PROP_FRAME_HEIGHT) * SCALE_FACTOR;
+    int cols = srcVid.get(CV_CAP_PROP_FRAME_WIDTH) * SCALE_FACTOR;
 
-    if(prev_frames[0][0].empty()) //initial resize of lists
+    list<uchar> prev_frames[rows][cols];
+
+    int i=0, j=0;
+    for(srcVid.read(frame); srcVid.read(frame); i++)
     {
-        cout << "in resize func" << endl;
-        for(int i=0; i<ROWS; i++)
-            for(int j=0; j<COLS; j++)
-            {
-                prev_frames[i][j].resize(N);
-            }
+        if(i%nth_frame == 0)
+        {
+            cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
+            resize(frame, frame, Size(0,0), SCALE_FACTOR ,SCALE_FACTOR); //resize frame
+
+            for(int i=0; i<rows; i++)
+                for(int j=0; j<cols; j++)
+                    prev_frames[i][j].push_back(frame.at<uchar>(i,j));
+        }
+
     }
 
-    for(int i=0; i<ROWS; i++)
-        for(int j=0; j<COLS; j++)
-        {
-            prev_frames[i][j].push_front(frame.at<uchar>(i,j));
-            prev_frames[i][j].pop_back();
+    int N = prev_frames[0][0].size();
+    cout << "number of frames to look at: " << N << endl;
 
+    Mat median(rows, cols, CV_8UC1, Scalar(255));
+
+    for(i=0; i<rows; i++)
+        for(j=0; j<cols; j++)
+        {///implementation of algorithm "medhist_bnd(D)" from paper "Speed Up Temporal Median Filter for Background Subtraction"
+        ///Mao-Hsiung Hung, Jeng-Shyang Pan, Chaur-Heh Hsieh (2010)
+
+            int O_mid = (N%2 == 0)? (N/2):(N-1)/2;
             int csum = 0;
             unsigned int hn[256];
             getHist(prev_frames[i][j], hn);
@@ -404,9 +412,17 @@ void extract_fg(Mat& frame, Mat& fg_mask, int N) //N must be odd
             }
             median.at<uchar>(i,j) = k;
 
+//            //median by sort
+//            prev_frames[i][j].sort();
+//
+//            list<uchar>::const_iterator it = prev_frames[i][j].begin();
+//            advance(it,prev_frames[i][j].size()/2);
+//
+//            median.at<uchar>(i,j) = *it;
         }
-        fg_mask = median.clone();
 
+
+    bg = median.clone();
 }
 
 

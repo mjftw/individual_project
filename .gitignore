@@ -1,0 +1,9 @@
+#Compiled source#
+#################
+*.exe
+*.o
+
+#Videos#
+########
+*.avi
+*.mp4
