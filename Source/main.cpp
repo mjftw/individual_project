@@ -6,6 +6,7 @@
 #include "libs.h"
 
 #define SRC_VID_DIR (std::string)"../Data/src/vid/"
+#define SRC_IMG_DIR (std::string)"../Data/src/img/"
 #define OUT_DIR (std::string)"../Data/out/"
 
 #define FCC CV_FOURCC('P','I','M','1') //MPEG-1 codec compression
@@ -18,8 +19,9 @@ int main()
 {
 
     //string src_img_path = "Data/Pictures/bp9_mask.tif";
-    string src_vid_name = "alphabet_dive";
-    //string src_vid_name = "4-way_fs_dive-pool";
+    string bg_img_path = SRC_IMG_DIR + (string)"tunnel-background.png";
+//    string src_vid_name = "alphabet_dive";
+    string src_vid_name = "4-way_fs_dive-pool";
 
     Mat src_img, dst;
     VideoCapture srcVid(SRC_VID_DIR + src_vid_name + ".avi"), dstVid;
@@ -27,7 +29,8 @@ int main()
 
     Mat frame, temp, bg;
 
-    extract_bg(srcVid, bg, 10); //use every 10th frame
+    //extract_bg(srcVid, bg, 10); //use every 10th frame
+    bg = imread(bg_img_path, CV_LOAD_IMAGE_GRAYSCALE);
 
     namedWindow("background image", WINDOW_NORMAL);
     imshow("background image", bg);
@@ -46,23 +49,33 @@ int main()
     else
         cout << endl << "Writing videos..." << endl;
 
+    namedWindow("Frame", WINDOW_NORMAL);
 
-    int morph_size = 1;
-    Mat element = getStructuringElement(2, Size(2*morph_size+1, 2*morph_size+1), Point(morph_size, morph_size));
+    int morph_size_c = 3; //close
+    int morph_size_o = 1; //open
+    int morph_size_d = 2; //dilate
+    Mat element_close = getStructuringElement(2, Size(2*morph_size_c+1, 2*morph_size_c+1), Point(morph_size_c, morph_size_c));
+    Mat element_open = getStructuringElement(2, Size(2*morph_size_o+1, 2*morph_size_o+1), Point(morph_size_o, morph_size_o));
+    Mat element_dilate = getStructuringElement(2, Size(2*morph_size_d+1, 2*morph_size_d+1), Point(morph_size_d, morph_size_d));
 
     for(srcVid.read(frame); srcVid.read(frame);)
     {
         cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
         resize(frame, frame, Size(0,0), SCALE_FACTOR, SCALE_FACTOR); //resize frame
         temp = cv::abs(frame - bg);
-        outVid_fgbgDiff << temp;
+//        outVid_fgbgDiff << temp;
 
         threshold(temp, temp, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU); //Adaptive thresholding
-        dilate(temp, temp, element);
-        outVid_fg << temp;
+  //      morphologyEx(temp, temp, cv::MORPH_OPEN, element_open);
+        dilate(temp, temp, element_dilate);
+        morphologyEx(temp, temp, cv::MORPH_CLOSE, element_close);
+        imshow("Frame", temp);
+//        outVid_fg << temp;
 
         find_skeleton_connected(temp, temp);
-        outVid_skel << temp;
+        //outVid_skel << temp;
+
+        waitKey(1);
     }
 
 
@@ -100,6 +113,8 @@ int main()
 //
 //    namedWindow("Final", WINDOW_NORMAL);
 //    imshow("Final", dst);
+
+
 
     waitKey(0);
     return 0;

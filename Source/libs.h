@@ -12,7 +12,9 @@ using namespace cv;
 
 #define WHITE 255
 #define BLACK 0
-#define SCALE_FACTOR 0.5
+
+#define SCALE_FACTOR 1
+
 
 void edge_detect(Mat& src, Mat& dst);
 void find_skeleton(Mat& src, Mat& dst); //Simple morphological skeletonisation
@@ -307,51 +309,7 @@ void sub_vid_bg(VideoCapture& src, VideoCapture& dst)
     return;
 }
 
-bool vec_sort(uchar i,uchar j){return (i<j);}
-
-//void compute_bg_img(VideoCapture& src, Mat& dst, int n_sample_frames)
-//{
-//    Mat frame;
-//    vector<Mat> sample_frames;
-//    float scale_factor = 1;
-//
-//    src.read(frame);
-//    resize(frame, frame, Size(0,0), scale_factor, scale_factor);
-//    Mat bg_img(frame.size(), CV_8UC3, Scalar(0));
-//    int rows = frame.rows;
-//    int cols = frame.cols;
-//
-//    int i=0;
-//    for(src.read(frame); src.read(frame);)
-//    {
-//        if(i%n_sample_frames == 0)
-//        {
-//            resize(frame, frame, Size(0,0), scale_factor, scale_factor);
-//            sample_frames.push_back(frame);
-//        }
-//        i++;
-//    }
-//
-//  ///*Only psudocode*/
-//    vector<uchar> pixVals;
-//    vec3 median;
-//
-//    for(i=0; i<rows; i++)
-//        for(int j=0; j<rows; j++)
-//        {
-//            pixVals.clear();
-//            for(int k=0; k<sample_frames.size(); k++)
-//            {
-//                pixVals.push_back(sample_frames[i][j]);
-//            }
-//            sort(pixVals, pixVals, vec_sort);
-//            bg_img[j][k] = median;
-//        }
-//
-//    dst = bg_img.clone();
-//}
-
-void getHist(uchar* prev_n_pixels,int arry_length, unsigned int* hist)
+void getHist(uchar* prev_n_pixels, int arry_length, unsigned int* hist)
 {
     for(int i=0; i<255; i++)
         hist[i] = 0;
@@ -417,14 +375,6 @@ void extract_bg(VideoCapture& srcVid, Mat& bg, int nth_frame)
                     break;
             }
             median.at<uchar>(i,j) = k;
-
-//            //median by sort
-//            prev_frames[i][j].sort();
-//
-//            list<uchar>::const_iterator it = prev_frames[i][j].begin();
-//            advance(it,prev_frames[i][j].size()/2);
-//
-//            median.at<uchar>(i,j) = *it;
         }
 
 
@@ -439,12 +389,3 @@ void extract_bg(VideoCapture& srcVid, Mat& bg, int nth_frame)
     delete prev_frames;
 
 }
-
-
-
-
-
-
-
-
-
