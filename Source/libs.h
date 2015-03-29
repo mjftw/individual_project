@@ -387,5 +387,4 @@ void extract_bg(VideoCapture& srcVid, Mat& bg, int nth_frame)
         delete prev_frames[i];
     }
     delete prev_frames;
-
 }

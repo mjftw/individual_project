@@ -28,7 +28,7 @@ int main()
     const int nFrames = srcVid.get(CV_CAP_PROP_FRAME_COUNT)/2;
     const int srcX = srcVid.get(CV_CAP_PROP_FRAME_WIDTH);
     const int srcY = srcVid.get(CV_CAP_PROP_FRAME_HEIGHT);
-    const int framesToUse = 3;
+    const int framesToUse = 5;
     const Size sampleSize(40,40);
     const int videoFps = 2;
 

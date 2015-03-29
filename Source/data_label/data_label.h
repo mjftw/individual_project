@@ -162,9 +162,9 @@ bool write_points(string path, vector<Point> pts, bool append) //NOT WORKING PRO
 
     for(int i=0; i<pts.size(); i++)
     {
-        dataFile << pts[i].y << ',' << pts[i].x;
+        dataFile << pts[i].y << ' ' << pts[i].x;
         if(i < pts.size()-1)
-            dataFile << ',';
+            dataFile << ' ';
         if(i == pts.size()-1)
             dataFile << endl;
     }

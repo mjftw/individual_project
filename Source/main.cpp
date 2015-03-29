@@ -19,7 +19,7 @@ int main()
 {
 
     //string src_img_path = "Data/Pictures/bp9_mask.tif";
-    string bg_img_path = SRC_IMG_DIR + (string)"tunnel-background.png";
+    string bg_img_path = SRC_IMG_DIR + "tunnel-background.png";
 //    string src_vid_name = "alphabet_dive";
     string src_vid_name = "4-way_fs_dive-pool";
 
@@ -66,11 +66,11 @@ int main()
 //        outVid_fgbgDiff << temp;
 
         threshold(temp, temp, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU); //Adaptive thresholding
-  //      morphologyEx(temp, temp, cv::MORPH_OPEN, element_open);
-        dilate(temp, temp, element_dilate);
-        morphologyEx(temp, temp, cv::MORPH_CLOSE, element_close);
+//        morphologyEx(temp, temp, cv::MORPH_OPEN, element_open);
+//        dilate(temp, temp, element_dilate);
+//        morphologyEx(temp, temp, cv::MORPH_CLOSE, element_close);
         imshow("Frame", temp);
-//        outVid_fg << temp;
+        outVid_fg << temp;
 
         find_skeleton_connected(temp, temp);
         //outVid_skel << temp;
