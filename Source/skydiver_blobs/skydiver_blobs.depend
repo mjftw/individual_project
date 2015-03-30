@@ -1,12 +1,11 @@
 # depslib dependency file v1.0
-1427588276 source:d:\libaries\uni work\year 3\part iii project\source\skydiver_blobs\main.cpp
+1427686772 source:d:\libaries\uni work\year 3\part iii project\source\skydiver_blobs\main.cpp
 	<iostream>
 	<opencv2/core/core.hpp>
 	<opencv2/highgui/highgui.hpp>
 	<opencv2/imgproc/imgproc.hpp>
 	<opencv2/video/background_segm.hpp>
-	"libs.h"
-	"mw_libCV.h"
+	"../mw_libCV.h"
 	"skydiverblob.h"
 
 1391489825 d:\libaries\uni work\year 3\part iii project\source\skydiver_blobs\opencv\include\opencv2\core\core.hpp
@@ -74,7 +73,7 @@
 	"opencv2/core/core.hpp"
 	<list>
 
-1427580434 d:\libaries\uni work\year 3\part iii project\source\skydiver_blobs\libs.h
+1427682994 d:\libaries\uni work\year 3\part iii project\source\skydiver_blobs\libs.h
 	<iostream>
 	<vector>
 	<algorithm>
@@ -94,12 +93,35 @@
 
 1427575502 d:\libaries\uni work\year 3\part iii project\source\skydiver_blobs\mw_libcv.h
 
-1427588274 d:\libaries\uni work\year 3\part iii project\source\skydiver_blobs\skydiverblob.h
+1427686786 d:\libaries\uni work\year 3\part iii project\source\skydiver_blobs\skydiverblob.h
 	<opencv2/core/core.hpp>
 	<opencv2/highgui/highgui.hpp>
 	<opencv2/imgproc/imgproc.hpp>
 	<cmath>
+	"../mw_libCV.h"
 
-1427588350 source:d:\libaries\uni work\year 3\part iii project\source\skydiver_blobs\skydiverblob.cpp
+1427686510 source:d:\libaries\uni work\year 3\part iii project\source\skydiver_blobs\skydiverblob.cpp
 	"skydiverblob.h"
+
+1427686914 d:\libaries\uni work\year 3\part iii project\source\mw_libcv.h
+	<fstream>
+	<iostream>
+	<opencv2/core/core.hpp>
+	<opencv2/imgproc/imgproc.hpp>
+
+1427682711 d:\libaries\uni work\year 3\part iii project\source\mw_libs\mw_libcv.h
+	<fstream>
+	<iostream>
+
+1427683984 d:\libaries\uni work\year 3\part iii project\source\mw_libcv.cpp
+	<fstream>
+	<iostream>
+	<opencv2/core/core.hpp>
+	<opencv2/imgproc/imgproc.hpp>
+
+1427683984 source:d:\libaries\uni work\year 3\part iii project\source\mw_libcv.cpp
+	<fstream>
+	<iostream>
+	<opencv2/core/core.hpp>
+	<opencv2/imgproc/imgproc.hpp>
 

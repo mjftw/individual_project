@@ -107,6 +107,8 @@
 			<Add library="C:/opencv_built/lib/libopencv_videostab249.dll.a" />
 			<Add directory="C:/opencv_built/bin" />
 		</Linker>
+		<Unit filename="Procrustes.cpp" />
+		<Unit filename="Procrustes.h" />
 		<Unit filename="libs.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>

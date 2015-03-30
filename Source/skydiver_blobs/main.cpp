@@ -3,8 +3,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/video/background_segm.hpp>
-#include "libs.h"
-#include "mw_libCV.h"
+#include "../mw_libCV.h"
 #include "skydiverblob.h"
 
 #define SRC_VID_DIR (std::string)"../../Data/src/vid/"
@@ -14,8 +13,38 @@
 #define FCC CV_FOURCC('P','I','M','1') //MPEG-1 codec compression
 //#define FCC 0 //uncompressed
 
+#define BLACK 0
+#define WHITE 255
+
 using namespace std;
 using namespace cv;
+
+inline bool contourSort(const vector<Point> contour1, const vector<Point> contour2)
+{
+    return (contourArea(contour1, false) > contourArea(contour2, false));
+}
+
+void find_skydiver_blobs(Mat& binary_src, vector<vector<Point> >& skydiver_blob_contours)
+{
+    vector<vector<Point> > connectedComponents;
+    Mat temp;
+
+    skydiver_blob_contours.clear();
+    threshold(binary_src, temp, 100, WHITE, THRESH_BINARY);
+
+    findContours(temp, connectedComponents, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point());
+    sort(connectedComponents.begin(), connectedComponents.end(), contourSort);
+
+    //*TODO* Need to make this work if less than 4 blobs.
+    //This will be the case if the skydivers are too close & their blobs overlap
+    for(int i=0;i<4; i++)
+        skydiver_blob_contours.push_back(connectedComponents[i]);
+
+    binary_src = Scalar(BLACK);
+    drawContours(binary_src, skydiver_blob_contours, -1, Scalar(WHITE), -1);
+
+    return;
+}
 
 int main()
 {
@@ -30,6 +59,7 @@ int main()
 
     overlay_contours(src, dst, skydiverBlobContours);
     imshow("Window", dst);
+    imwrite("skydiver_contours.jpg", dst);
     waitKey(0);
 
     Mat skydiverBlobs[4];
@@ -43,6 +73,10 @@ int main()
         cout << "Skydiver " << i << ": orientation = " << skydivers[i].orientation << " degrees, centroid = (" << skydivers[i].centroid.x << ", " << skydivers[i].centroid.y << ")" << endl;
         Mat params = skydivers[i].paramaters_image();
         imshow("Window", params);
+
+        stringstream numSS("");
+        numSS << i;
+        imwrite("blob_params_" + numSS.str() + ".jpg", params);
         waitKey(0);
     }
 

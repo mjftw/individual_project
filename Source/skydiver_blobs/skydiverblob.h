@@ -5,6 +5,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <cmath>
+#include "../mw_libCV.h"
 
 class SkydiverBlob
 {
@@ -18,14 +19,9 @@ class SkydiverBlob
         std::vector<cv::Point> contour;
         cv::Mat mask;
         cv::Point centroid;
-        float orientation;
-        float scale;
+        double orientation;
+        double scaleMetric;
         cv::Point translation; //translation offset
-
-    private:
-        void approx_orientation();
-        void approx_scale();
-        void approx_translation();
 };
 
 #endif // SKYDIVERBLOB_H
