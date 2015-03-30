@@ -78,21 +78,25 @@ int main()
     Mat meanPointsMat(meanPoints);
     double meanOrientation = get_major_axis(meanPointsMat);
 
+    cout << "meanScaleMetric: " << meanScaleMetric;
+    cout << ", meanCentroid: " <<  meanCentroid;
+    cout << ", meanOrientation: " << meanOrientation << endl;
+
     double initialScale[4];
     Point2f initialTranslation[4];
     double initialRotation[4];
     Mat initialModelFitMat[4];
     vector<vector<Point2f> > initialModelFit(4);
 
-
-    for(int i=0; i<4; i++) //For each skydiver blob
-    {
+    int i=3;
+//    for(int i=0; i<4; i++) //For each skydiver blob
+//    {
         initialScale[i] = skydivers[i].scaleMetric/meanScaleMetric;
         initialTranslation[i] = skydivers[i].centroid - meanCentroid;
         initialRotation[i] = skydivers[i].orientation - meanOrientation;
 
         initialModelFitMat[i] = meanPointsMat;
-        initialModelFitMat[i] *= initialScale[i];
+//        initialModelFitMat[i] *= initialScale[i];
         initialModelFitMat[i] += Scalar(initialTranslation[i].x, initialTranslation[i].y);
 
         cout << "scale: " << initialScale[i];
@@ -114,7 +118,7 @@ int main()
         numSS << i;
         imwrite("blob_params_" + numSS.str() + ".jpg", params);
         waitKey(0);
-    }
+//    }
 
    return 0;
 }

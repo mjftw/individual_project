@@ -30,20 +30,25 @@ int main()
     Procrustes proc;
     dataMat = proc.generalizedProcrustes(dataMat, meanMat);
     vector<vector<Point2f> > meanMatVec(1);
+    meanMat *= 500;
+    meanMat += Scalar(300, 300);
     meanMat.reshape(2).copyTo(meanMatVec[0]);
 
     write_data_pts("data_points_mean.txt", meanMatVec);
 
     for(int i=0; i<dataMat.size(); i++)
+    {
+        dataMat[i] *= 500;
+        dataMat[i] += Scalar(300, 300);
         dataMat[i].reshape(2).copyTo(data[i]);
+    }
+
 
     write_data_pts("data_points_PA.txt", data);
 
     Mat meanOp(1000, 1000, CV_8UC3, Scalar(255, 255, 255));
 
     vector<Point2f> meanShape;
-    meanMat *= 500;
-    meanMat += Scalar(300, 300);
     meanMat.reshape(2).copyTo(meanShape);
 
     plot_pts(meanOp, meanShape, colours[0]);
@@ -52,8 +57,6 @@ int main()
     for(int i=0; i<dataMat.size(); i++)
     {
         vector<Point2f> tempShape;
-        dataMat[i] *= 500;
-        dataMat[i] += Scalar(300, 300);
         dataMat[i].reshape(2).copyTo(tempShape);
         plot_pts(GPAOp, tempShape, colours[i]);
     }

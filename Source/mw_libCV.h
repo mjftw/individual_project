@@ -157,6 +157,7 @@ inline Point2f get_vec_centroid(vector<Point2f>& pts)
     return centroid;
 }
 
+/*TODO This may not be working correctly?*/
 inline double get_scale_metric(vector<Point2f>& pts)
 {//centroid size
 

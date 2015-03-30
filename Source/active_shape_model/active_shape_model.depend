@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1427680179 source:d:\libaries\uni work\year 3\part iii project\source\active_shape_model\main.cpp
+1427692422 source:d:\libaries\uni work\year 3\part iii project\source\active_shape_model\main.cpp
 	<iostream>
 	<fstream>
 	<stdlib.h>
@@ -173,6 +173,9 @@
 	<set>
 	<valarray>
 
-1427682536 d:\libaries\uni work\year 3\part iii project\source\mw_libcv.h
+1427690658 d:\libaries\uni work\year 3\part iii project\source\mw_libcv.h
 	<fstream>
+	<iostream>
+	<opencv2/core/core.hpp>
+	<opencv2/imgproc/imgproc.hpp>
 
