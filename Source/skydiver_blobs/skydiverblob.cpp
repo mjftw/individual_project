@@ -21,7 +21,9 @@ void SkydiverBlob::approx_parameters(std::vector<cv::Point> Contour, int Src_row
 
     this->orientation = get_major_axis(this->mask);
     this->centroid = get_centroid(this->mask);
-    this->scaleMetric = get_scale_metric(this->contour);
+    vector<Point2f> contour2f;
+    Mat(this->contour).copyTo(contour2f);
+    this->scaleMetric = get_scale_metric(contour2f);
 
     return;
 }

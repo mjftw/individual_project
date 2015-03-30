@@ -68,10 +68,46 @@ int main()
     for(int i=0; i<4; i++)
         skydivers[i].approx_parameters(skydiverBlobContours[i], src.rows, src.cols);
 
+    vector<vector<Point2f> > meanPointsVec;
+    if(!load_data_pts("data_points_mean.txt", meanPointsVec))
+        cout << "Could not open mean data points file." << endl;
+    vector<Point2f> meanPoints = meanPointsVec[0];
+
+    double meanScaleMetric = get_scale_metric(meanPoints);
+    Point2f meanCentroid = get_vec_centroid(meanPoints);
+    Mat meanPointsMat(meanPoints);
+    double meanOrientation = get_major_axis(meanPointsMat);
+
+    double initialScale[4];
+    Point2f initialTranslation[4];
+    double initialRotation[4];
+    Mat initialModelFitMat[4];
+    vector<vector<Point2f> > initialModelFit(4);
+
+
     for(int i=0; i<4; i++) //For each skydiver blob
     {
-        cout << "Skydiver " << i << ": orientation = " << skydivers[i].orientation << " degrees, centroid = (" << skydivers[i].centroid.x << ", " << skydivers[i].centroid.y << ")" << endl;
+        initialScale[i] = skydivers[i].scaleMetric/meanScaleMetric;
+        initialTranslation[i] = skydivers[i].centroid - meanCentroid;
+        initialRotation[i] = skydivers[i].orientation - meanOrientation;
+
+        initialModelFitMat[i] = meanPointsMat;
+        initialModelFitMat[i] *= initialScale[i];
+        initialModelFitMat[i] += Scalar(initialTranslation[i].x, initialTranslation[i].y);
+
+        cout << "scale: " << initialScale[i];
+        cout << ", translation: " << initialTranslation[i];
+        cout << ", rotation: " << initialRotation[i] << endl;
+
+        cout << initialModelFitMat[i] << endl;
+
+        initialModelFitMat[i].reshape(2).copyTo(initialModelFit[i]);
+
+        //Output
         Mat params = skydivers[i].paramaters_image();
+        Scalar colour(128);
+        plot_pts(params, initialModelFit[i], colour);
+
         imshow("Window", params);
 
         stringstream numSS("");

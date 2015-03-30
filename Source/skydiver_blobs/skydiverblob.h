@@ -18,10 +18,10 @@ class SkydiverBlob
 
         std::vector<cv::Point> contour;
         cv::Mat mask;
-        cv::Point centroid;
+        cv::Point2f centroid;
         double orientation;
         double scaleMetric;
-        cv::Point translation; //translation offset
+        cv::Point2f translation; //translation offset
 };
 
 #endif // SKYDIVERBLOB_H

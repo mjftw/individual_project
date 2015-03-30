@@ -64,7 +64,7 @@ inline bool load_data_pts(string data_file_path, vector<vector<Point2f> >& data)
         return false;
     }
 
-    int x,y;
+    double x,y;
 
     for(int i=0; !dataFile.eof(); i++)
     {
@@ -143,8 +143,8 @@ inline double get_major_axis(Mat& binary_img, bool use_degrees = true)
     return theta;
 }
 
-inline double get_scale_metric(vector<Point>& pts)
-{//centroid size
+inline Point2f get_vec_centroid(vector<Point2f>& pts)
+{
     Point2f centroid;
     for(int i=0; i<pts.size(); i++)
     {
@@ -154,6 +154,13 @@ inline double get_scale_metric(vector<Point>& pts)
     centroid.x /= pts.size();
     centroid.y /= pts.size();
 
+    return centroid;
+}
+
+inline double get_scale_metric(vector<Point2f>& pts)
+{//centroid size
+
+    Point2f centroid = get_vec_centroid(pts);
     double scaleMetric = 0;
     for(int i=0; i<pts.size(); i++)
         scaleMetric += sqrt((pts[i].x-centroid.x)*(pts[i].x-centroid.x) + (pts[i].y-centroid.y)*(pts[i].y-centroid.y));
