@@ -88,9 +88,9 @@ int main()
     Mat initialModelFitMat[4];
     vector<vector<Point2f> > initialModelFit(4);
 
-    int i=3;
-//    for(int i=0; i<4; i++) //For each skydiver blob
-//    {
+
+    for(int i=0; i<4; i++) //For each skydiver blob
+    {
         initialScale[i] = skydivers[i].scaleMetric/meanScaleMetric;
         initialTranslation[i] = skydivers[i].centroid - meanCentroid;
         initialRotation[i] = skydivers[i].orientation - meanOrientation;
@@ -118,7 +118,7 @@ int main()
         numSS << i;
         imwrite("blob_params_" + numSS.str() + ".jpg", params);
         waitKey(0);
-//    }
+    }
 
    return 0;
 }

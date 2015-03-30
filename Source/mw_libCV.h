@@ -169,4 +169,13 @@ inline double get_scale_metric(vector<Point2f>& pts)
     return scaleMetric;
 }
 
+inline void median_filter_binary(Mat& src, Mat& dst, int filter_size = 3, int filter_shape = MORPH_RECT)
+{
+    Mat kernel = getStructuringElement(filter_shape, Size(filter_size, filter_size));
+    filter2D(src, dst, CV_8U, kernel);
+    threshold(dst, dst, 6, 255, THRESH_BINARY);
+}
+
+
+
 #endif //MW_LIBCV_H

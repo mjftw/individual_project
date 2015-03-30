@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<opencv_storage>
+	<! Config file to be used by all programs in the FS_recognition workspace !>
+	<! May also store information about what CODEC to use for videowriting, output image extension, etc.!>
+	<Data_Output_Path> "../../Data/out" </Data_Output_Path>
+	<Data_Input_Path> "../../Data/src" </Data_Input_Path>
+</opencv_storage>

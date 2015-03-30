@@ -32,7 +32,7 @@ cv::Mat SkydiverBlob::paramaters_image()
 {
     cv::Mat dst = this->mask.clone();
 
-    cv::circle(dst, this->centroid, 5, cv::Scalar(128), 2);
+    cv::circle(dst, this->centroid, 7, cv::Scalar(128), 2);
     int l = 50;// line length
     cv::line(dst, this->centroid, cv::Point(this->centroid.x + l*cos(orientation), this->centroid.y + l*sin(orientation)), cv::Scalar(128), 2);
 

@@ -3,11 +3,12 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/video/background_segm.hpp>
-#include "libs.h"
+#include "extract_bg.h"
+#include "../mw_libCV.h"
 
-#define SRC_VID_DIR (std::string)"../Data/src/vid/"
-#define SRC_IMG_DIR (std::string)"../Data/src/img/"
-#define OUT_DIR (std::string)"../Data/out/"
+#define SRC_VID_DIR (std::string)"../../Data/src/vid/"
+#define SRC_IMG_DIR (std::string)"../../Data/src/img/"
+#define OUT_DIR (std::string)"../../Data/out/"
 
 #define FCC CV_FOURCC('P','I','M','1') //MPEG-1 codec compression
 //#define FCC 0 //uncompressed
@@ -51,13 +52,6 @@ int main()
 
     namedWindow("Frame", WINDOW_NORMAL);
 
-    int morph_size_c = 3; //close
-    int morph_size_o = 1; //open
-    int morph_size_d = 2; //dilate
-    Mat element_close = getStructuringElement(2, Size(2*morph_size_c+1, 2*morph_size_c+1), Point(morph_size_c, morph_size_c));
-    Mat element_open = getStructuringElement(2, Size(2*morph_size_o+1, 2*morph_size_o+1), Point(morph_size_o, morph_size_o));
-    Mat element_dilate = getStructuringElement(2, Size(2*morph_size_d+1, 2*morph_size_d+1), Point(morph_size_d, morph_size_d));
-
     for(srcVid.read(frame); srcVid.read(frame);)
     {
         cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
@@ -66,13 +60,12 @@ int main()
 //        outVid_fgbgDiff << temp;
 
         threshold(temp, temp, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU); //Adaptive thresholding
-//        morphologyEx(temp, temp, cv::MORPH_OPEN, element_open);
-//        dilate(temp, temp, element_dilate);
-//        morphologyEx(temp, temp, cv::MORPH_CLOSE, element_close);
+
+        median_filter_binary(temp, temp, 5, MORPH_CROSS);
+
         imshow("Frame", temp);
         outVid_fg << temp;
-
-        find_skeleton_connected(temp, temp);
+        imwrite("frame.png", temp);
         //outVid_skel << temp;
 
         waitKey(1);
