@@ -7,5 +7,5 @@
 			<Cursor1 position="379" topLine="0" />
 		</Cursor>
 	</File>
-	<EditorTabsLayout layout="099b31c055196ce90000e6b400000002=0;skydiver_blobs:..\mw_libCV.h,*1;top_level_program:main.cpp@layout2|name=dummy;caption=;state=2098174;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=841;besth=380;minw=841;minh=380;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=099b31c055196ce90000e6b400000002;caption=;state=2098172;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=200;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=202|" />
+	<EditorTabsLayout layout="09fadf78551a0cd7000016ed00000002=+0;active_shape_model:active_shape_model.cpp|09fad998551a0ce9000060a100000003=*1;top_level_program:main.cpp@layout2|name=dummy;caption=;state=2098174;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=841;besth=380;minw=841;minh=380;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=09fadf78551a0cd7000016ed00000002;caption=;state=2098172;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=200;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=09fad998551a0ce9000060a100000003;caption=;state=2098172;dir=4;layer=0;row=0;pos=0;prop=100000;bestw=200;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(4,0,0)=737|dock_size(5,0,0)=202|" />
 </CodeBlocks_layout_file>
