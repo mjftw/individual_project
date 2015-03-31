@@ -10,6 +10,7 @@
 using namespace std;
 using namespace cv;
 
+
 ///Taken from OpenCV PCA example program:
 ///opencv_source_code/samples/cpp/pca.cpp
 static Mat formatImagesForPCA(const vector<Mat> &data)
@@ -24,7 +25,7 @@ static Mat formatImagesForPCA(const vector<Mat> &data)
     return dst;
 }
 
-Mat reformatImageFromPCA(Mat& img, int channels = 1, int rows = 11)
+Mat reformatImageFromPCA(Mat& img, int channels=1, int rows=11)
 {
     vector<double> colVec;
     vector<Point2f> pts;
@@ -38,11 +39,62 @@ Mat reformatImageFromPCA(Mat& img, int channels = 1, int rows = 11)
     return Mat(pts);
 }
 
-
 void upscale_data(Mat& data)
 {
     data *= 500;
     data += Scalar(300, 300);
+}
+
+void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_components, int component_max, int component_min, Size window_size = Size(1000,1000))
+{
+    Mat dataMatPCA = formatImagesForPCA(GPA_data);
+    vector<Mat> meanMat_{GPA_mean};
+    Mat meanMatPCA = formatImagesForPCA(meanMat_);
+
+    namedWindow("PCA component sliders", WINDOW_AUTOSIZE);
+    PCA pca(dataMatPCA, meanMatPCA, CV_PCA_DATA_AS_ROW, n_components);
+
+    int initialVal = ((component_max - component_min) / 2);
+    int maxVal = component_max - component_min;
+    int component[n_components];
+
+    for(int i=0; i<n_components; i++)
+    {
+        component[i] = initialVal;
+        stringstream ss;
+        ss << i;
+        createTrackbar(string("Comp ") + ss.str().c_str(), "PCA component sliders", &component[i], maxVal);
+    }
+
+    while(1)
+    {
+        Mat pcaShapeOp(window_size, CV_8UC3, Scalar(255, 255, 255));
+
+        float descriptors[n_components];
+        for(int i=0; i<n_components; i++)
+            descriptors[i] = component[i] + component_min;
+
+        Mat pcaShape = pca.backProject(Mat(1, n_components, CV_32F, &descriptors));
+
+        vector<Point2f> pcaShapeVec;
+        reformatImageFromPCA(pcaShape).copyTo(pcaShapeVec);
+
+        Scalar colour(0, 0, 0);
+        draw_body_pts(pcaShapeOp, pcaShapeVec, colour);
+
+        stringstream ss;
+        for(int i=0; i< n_components; i++)
+        {
+            ss << "C" << i << "=" << (int)descriptors[i];
+            if(i+1 < n_components)
+                ss << ", ";
+        }
+
+        putText(pcaShapeOp, ss.str().c_str(), Point(5, 30), FONT_HERSHEY_SIMPLEX, 0.8, Scalar(128, 128, 128));
+
+        imshow("PCA component sliders", pcaShapeOp);
+        waitKey(1);
+    }
 }
 
 int main()
@@ -57,7 +109,6 @@ int main()
     for(int i=0; i<data.size(); i++)
     {
         dataMat.push_back(Mat(data[i]));
-        cout << dataMat[i] << endl;
         colours.push_back(Scalar(rand()%256, rand()%256, rand()%256));
         plot_pts(dataOp, data[i], colours[i]);
     }
@@ -106,26 +157,60 @@ int main()
     imwrite("mean_shape.jpg", meanOp);
     imwrite("GPA_shapes.jpg", GPAOp);
 
-    Mat dataMatPCA = formatImagesForPCA(dataMatGPA);
-    vector<Mat> meanMat_{meanMat};
-    Mat meanMatPCA = formatImagesForPCA(meanMat_);
+    show_PCA_component_sliders(dataMatGPA, meanMat, 2, 100, -100);
+//    Mat dataMatPCA = formatImagesForPCA(dataMatGPA);
+//    vector<Mat> meanMat_{meanMat};
+//    Mat meanMatPCA = formatImagesForPCA(meanMat_);
+//
+//    namedWindow("pcaShapeOp", WINDOW_AUTOSIZE);
+//    int nComponents = 5;
+//    PCA pca(dataMatPCA, meanMatPCA, CV_PCA_DATA_AS_ROW, nComponents);
+//
+//    int initialVal = 100;
+//    int maxVal = 200;
+//    int component[nComponents];
+//
+//    for(int i=0; i<nComponents; i++)
+//    {
+//        component[i] = initialVal;
+//        stringstream ss;
+//        ss << i;
+//        createTrackbar(ss.str().c_str(), "pcaShapeOp", &component[i], maxVal);
+//    }
+//
+//
+//    while(1)
+//    {
+//        float descriptors[nComponents];
+//        for(int i=0; i<nComponents; i++)
+//            descriptors[i] = component[i] - 100;
+//
+//        Mat pcaShape = pca.backProject(Mat(1, nComponents, CV_32F, &descriptors));
+//
+//        vector<Point2f> pcaShapeVec;
+//        reformatImageFromPCA(pcaShape).copyTo(pcaShapeVec);
+//
+//        Mat pcaShapeOp(1000, 1000, CV_8UC3, Scalar(255, 255, 255));
+//        draw_body_pts(pcaShapeOp, pcaShapeVec, colours[0]);
+//        imshow("pcaShapeOp", pcaShapeOp);
+//        waitKey(1);
+//    }
 
-    double retainedVariance = 0.9;
-    PCA pca(dataMatPCA, meanMatPCA, CV_PCA_DATA_AS_ROW, retainedVariance);
 
-    vector<vector<Point2f> > gpaDataVecPCA(gpaDataVec.size());
-    vector<Mat> gpaDataMatPCA;
-    Mat gpaDataPCAop(1000, 1000, CV_8UC3, Scalar(255, 255, 255));
-    for(int i=0; i<gpaDataVec.size(); i++)
-    {
-        Mat temp = pca.backProject(pca.project(dataMatPCA.row(i)));
-        reformatImageFromPCA(temp).copyTo(gpaDataVecPCA[i]);
-        plot_pts(gpaDataPCAop, gpaDataVecPCA[i], colours[i]);
-    }
-
-
-    namedWindow("GPA shapes PCA", WINDOW_AUTOSIZE);
-    imshow("GPA shapes PCA", gpaDataPCAop);
+//    vector<vector<Point2f> > gpaDataVecPCA(gpaDataVec.size());
+//    vector<Mat> gpaDataMatPCA;
+//    Mat gpaDataPCAop(1000, 1000, CV_8UC3, Scalar(255, 255, 255));
+//    for(int i=0; i<gpaDataVec.size(); i++)
+//    {
+//        Mat temp = pca.project(dataMatPCA.row(i));
+//        cout << "nComponents = " << temp.cols << endl;
+//        temp = pca.backProject(temp);
+//        reformatImageFromPCA(temp).copyTo(gpaDataVecPCA[i]);
+//        plot_pts(gpaDataPCAop, gpaDataVecPCA[i], colours[i]);
+//    }
+//
+//    namedWindow("GPA shapes PCA", WINDOW_AUTOSIZE);
+//    imshow("GPA shapes PCA", gpaDataPCAop);
 
     waitKey(0);
     return 0;

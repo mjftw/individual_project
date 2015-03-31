@@ -3,8 +3,6 @@
   Copyright (c) 2015 Merlin Webster. All rights reserved.
 */
 
-
-
 #ifndef MW_LIBCV_H
 #define MW_LIBCV_H
 
@@ -15,6 +13,9 @@
 
 using namespace std;
 using namespace cv;
+
+//Body points definitions
+enum{WAIST=0,NECK=1,HEAD=2,L_HAND=3,L_ELBOW=4,L_KNEE=5, L_FOOT=6,R_FOOT=7,R_KNEE=8,R_ELBOW=9,R_HAND=10};
 
 inline void find_contour_centroids(std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Point>& output_array/*, bool hull=1*/)
 {
@@ -174,6 +175,32 @@ inline void median_filter_binary(Mat& src, Mat& dst, int filter_size = 3, int fi
     Mat kernel = getStructuringElement(filter_shape, Size(filter_size, filter_size));
     filter2D(src, dst, CV_8U, kernel);
     threshold(dst, dst, 6, 255, THRESH_BINARY);
+}
+
+inline void draw_body_pts(Mat& img, vector<Point2f>& pts, Scalar& colour)
+{
+    line(img, pts[WAIST], pts[NECK], colour);
+    line(img, pts[NECK], pts[HEAD], colour);
+    line(img, pts[L_HAND], pts[L_ELBOW], colour);
+    line(img, pts[R_HAND], pts[R_ELBOW], colour);
+    line(img, pts[L_KNEE], pts[L_FOOT], colour);
+    line(img, pts[R_KNEE], pts[R_FOOT], colour);
+    line(img, pts[NECK], pts[L_ELBOW], colour);
+    line(img, pts[NECK], pts[R_ELBOW], colour);
+    line(img, pts[WAIST], pts[L_KNEE], colour);
+    line(img, pts[WAIST], pts[R_KNEE], colour);
+
+    circle(img, pts[HEAD], 20, colour, 2);
+    circle(img, pts[L_HAND], 5, colour, 2);
+    circle(img, pts[R_HAND], 5, colour, 2);
+    circle(img, pts[NECK], 2, colour, 2);
+    circle(img, pts[WAIST], 2, colour, 2);
+    circle(img, pts[L_KNEE], 2, colour, 2);
+    circle(img, pts[R_KNEE], 2, colour, 2);
+    circle(img, pts[L_ELBOW], 2, colour, 2);
+    circle(img, pts[R_ELBOW], 2, colour, 2);
+    circle(img, pts[L_FOOT], 2, colour, 2);
+    circle(img, pts[R_FOOT], 2, colour, 2);
 }
 
 

@@ -8,8 +8,6 @@
 #define SRC_IMG_DIR (std::string)"../Data/src/img/"
 #define OUT_DIR (std::string)"../Data/out/"
 
-#define FCC CV_FOURCC('P','I','M','1') //MPEG-1 codec compression
-//#define FCC 0 //uncompressed
 
 using namespace std;
 using namespace cv;
