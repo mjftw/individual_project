@@ -63,14 +63,7 @@ vector<Point2f> rotate_pts(vector<Point2f>& pts, double angle, double scale=1, b
 
     for(int i=0; i<pts.size(); i++)
     {
-        Point2f pt = pts[i] - mean;
-        Point2f tmp;
-        cout << "pt" << i << ": " << pt.x << ", " << pt.y << endl;
-        pt *= scale;
-        tmp.x = pt.x*cos(angle) - pt.y*sin(angle);
-        tmp.y = pt.x*sin(angle) + pt.y*cos(angle);
-        tmp += mean;
-        dst.push_back(tmp);
+        dst.push_back(rotate_pt(pts[i], mean, angle, scale));
     }
 
     return dst;
@@ -78,86 +71,89 @@ vector<Point2f> rotate_pts(vector<Point2f>& pts, double angle, double scale=1, b
 
 int main()
 {
-    Mat dst, src = imread("skydiver_blobs_unconnected1.png", CV_LOAD_IMAGE_GRAYSCALE);
-    vector<vector<Point> > skydiverBlobContours;
+    VideoCapture srcVid(SRC_VID_PATH), dstVid;
+    Mat bg;
+    imread(BG_IMG_PATH);
 
     PCA pca;
     PCA_load(pca, "../../Data/out/PCA.yml");
 
     namedWindow("Window", CV_WINDOW_NORMAL);
-    imshow("Window", src);
-    waitKey(0);
+    namedWindow("Contours", CV_WINDOW_NORMAL);
 
-    find_skydiver_blobs(src, skydiverBlobContours);
-
-    overlay_contours(src, dst, skydiverBlobContours);
-    imshow("Window", dst);
-    imwrite("skydiver_contours.jpg", dst);
-    waitKey(0);
-
-    Mat skydiverBlobs[4];
-    SkydiverBlob skydivers[4];
-
-
-    for(int i=0; i<4; i++)
-        skydivers[i].approx_parameters(skydiverBlobContours[i], src.rows, src.cols);
-
-    vector<vector<Point2f> > meanPointsVec;
-    if(!load_data_pts("data_points_mean.txt", meanPointsVec))
-        cout << "Could not open mean data points file." << endl;
-
-    vector<Point2f> meanPoints = meanPointsVec[0];
-
-    Mat meanPointsMat(meanPoints);
-
-    vector<vector<Point2f> > GPAPoints;
-    if(!load_data_pts("data_points_mean.txt", GPAPoints))
-        cout << "Could not open mean data points file." << endl;
-
-    vector<Mat> GPAPointsMat;
-    for(int i=0; i< GPAPoints.size(); i++)
-        GPAPointsMat.push_back(Mat(GPAPoints));
-
-//    Mat GPAPointsMatPCA = formatImagesForPCA(GPAPointsMat);
-//    Mat projected =  pca.project(GPAPointsMatPCA.row(0));
-
-
-
-    double meanScaleMetric = get_scale_metric(meanPointsMat);
-    Point2f meanCentroid = get_vec_centroid(meanPoints);
-    double meanOrientation = get_major_axis(meanPointsMat);
-
-    cout << "meanScaleMetric: " << meanScaleMetric;
-    cout << ", meanCentroid: " <<  meanCentroid;
-    cout << ", meanOrientation: " << meanOrientation << endl;
-
-    vector<vector<Point2f> > initialModelFit(4);
-
-    for(int i=0; i<4; i++) //For each skydiver blob
+    Mat frame;
+    for(srcVid.read(frame); srcVid.read(frame);)
     {
-        double initialScale = skydivers[i].scaleMetric/meanScaleMetric;
-        Point2f initialTranslation = skydivers[i].centroid - meanCentroid;
-        double initialRotation = skydivers[i].orientation - meanOrientation;
+        vector<vector<Point> > skydiverBlobContours = get_skydiver_blobs(frame, bg, frame);
 
-        Mat initialModelFitMat = meanPointsMat.clone();
-        initialModelFitMat += Scalar(initialTranslation.x, initialTranslation.y);
+        Mat contours;
+        overlay_contours(frame, contours, skydiverBlobContours);
+        imshow("Contours", contours);
 
-        initialModelFitMat.reshape(2).copyTo(initialModelFit[i]);
+        Mat skydiverBlobs[4];
+        SkydiverBlob skydivers[4];
 
-        initialModelFit[i] = rotate_pts(initialModelFit[i], initialRotation, initialScale);
+        for(int i=0; i<4; i++)
+            skydivers[i].approx_parameters(skydiverBlobContours[i], frame.rows, frame.cols);
 
-        //Output
-        Mat params = skydivers[i].paramaters_image().clone();
-        Scalar colour(128);
-        draw_body_pts(params, initialModelFit[i], colour);
+        vector<vector<Point2f> > meanPointsVec;
+        if(!load_data_pts("data_points_mean.txt", meanPointsVec))
+            cout << "Could not open mean data points file." << endl;
 
-        imshow("Window", params);
+        vector<Point2f> meanPoints = meanPointsVec[0];
 
-        stringstream numSS("");
-        numSS << i;
-        imwrite("blob_params_" + numSS.str() + ".jpg", params);
-        waitKey(0);
+        Mat meanPointsMat(meanPoints);
+
+        vector<vector<Point2f> > GPAPoints;
+        if(!load_data_pts("data_points_mean.txt", GPAPoints))
+            cout << "Could not open mean data points file." << endl;
+
+        vector<Mat> GPAPointsMat;
+        for(int i=0; i< GPAPoints.size(); i++)
+            GPAPointsMat.push_back(Mat(GPAPoints));
+
+    //    Mat GPAPointsMatPCA = formatImagesForPCA(GPAPointsMat);
+    //    Mat projected =  pca.project(GPAPointsMatPCA.row(0));
+
+
+
+        double meanScaleMetric = get_scale_metric(meanPointsMat);
+        Point2f meanCentroid = get_vec_centroid(meanPoints);
+        double meanOrientation = get_major_axis(meanPointsMat);
+
+        cout << "meanScaleMetric: " << meanScaleMetric;
+        cout << ", meanCentroid: " <<  meanCentroid;
+        cout << ", meanOrientation: " << meanOrientation << endl;
+
+        vector<vector<Point2f> > initialModelFit(4);
+
+        for(int i=0; i<4; i++) //For each skydiver blob
+        {
+            double initialScale = skydivers[i].scaleMetric/meanScaleMetric;
+            Point2f initialTranslation = skydivers[i].centroid - meanCentroid;
+            double initialRotation = skydivers[i].orientation - meanOrientation;
+
+            Mat initialModelFitMat = meanPointsMat.clone();
+            initialModelFitMat += Scalar(initialTranslation.x, initialTranslation.y);
+
+            initialModelFitMat.reshape(2).copyTo(initialModelFit[i]);
+
+            initialModelFit[i] = rotate_pts(initialModelFit[i], initialRotation, initialScale);
+
+            //Output
+            Mat params = skydivers[i].paramaters_image().clone();
+            Scalar colour(128);
+            draw_body_pts(params, initialModelFit[i], colour);
+
+            imshow("Window", params);
+
+            stringstream numSS("");
+            numSS << i;
+            imwrite("blob_params_" + numSS.str() + ".jpg", params);
+            waitKey(1);
+        }
     }
+
 
    return 0;
 }

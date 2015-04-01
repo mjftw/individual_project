@@ -35,7 +35,7 @@ void call_back(int event, int x, int y, int flags, void* data_struct)
     {
         if(data->data_prt->size() < 11)
         {
-            cout << get_point_name(data->data_prt->size()) << " (" << data->data_prt->size() << "): (" << x << ", " << y << "), " << get_point_name(data->data_prt->size()) << " next" << endl;
+            cout << get_point_name(data->data_prt->size()) << ": (" << x << ", " << y << "), " << get_point_name(data->data_prt->size()) << " next" << endl;
             data->data_prt->push_back(Point2f(x, y));
         }
         if(data->data_prt->size() == 11)
@@ -43,9 +43,11 @@ void call_back(int event, int x, int y, int flags, void* data_struct)
     }
     else if(event == EVENT_RBUTTONDOWN)
     {
-        cout << "Last point removed" << endl;
         if(data->data_prt->size() > 0)
+        {
+            cout << "Last point removed" << endl;
             data->data_prt->pop_back();
+        }
     }
     else if(event == EVENT_MBUTTONDOWN)
     {
@@ -72,41 +74,64 @@ int main()
     namedWindow("Frame", CV_WINDOW_NORMAL);
 
     vector<vector<Point2f> > landmarks;
+    vector<Mat> frames;
+    Mat frame;
 
     setMouseCallback("Frame", call_back, &landmarks.back());
 
+    cout << "Left mouse button: Add point" << endl;
+    cout << "Left mouse button: Remove point" << endl;
+    cout << "Middle mouse button: Skip frame" << endl << endl;
+
+    bool skipFrame;
     for(int i=framesToUse; i<nFrames; i++)
     {
-        Mat frame;
         srcVid.read(frame);
+
         if((i%((int)floor((nFrames/(framesToUse)) + 0.5))) == framesToUse) //select frames to use
         {
             cout << "Loading next frame" << endl;
+
+            Mat frameAnnotated = frame.clone();
             Mat img = frame.clone();
+
             for(int j=0; j<4; j++)
             {
                 landmarks.resize(landmarks.size()+1);
                 imshow("Frame", img);
 
-                bool skipFrame = false;
-                DataStructType dataStruct = {&landmarks.back(), &img, &frame, &skipFrame};
+                skipFrame = false;
+                DataStructType dataStruct = {&landmarks.back(), &img, &frameAnnotated, &skipFrame};
                 setMouseCallback("Frame", call_back, &dataStruct);
                 do
                 {
                     waitKey(0);
                     if(skipFrame)
                     {
-                        landmarks.pop_back();
-                        break;
+                        if(landmarks.size()%4 != 1)
+                        {
+                            cout << "Cannot skip frame, landmark vector(s) collected on frame" << endl;
+                            skipFrame = false;
+                        }
+                        else
+                        {
+                            landmarks.pop_back();
+                            break;
+                        }
                     }
                     else if(landmarks.back().size() < 11)
                         cout << "Looks like you missed a point" << endl;
 
-
                 }while(landmarks.back().size() < 11);
                 if(skipFrame)
                     break;
-                draw_body_pts(frame, landmarks.back(), Scalar(255, 255, 0));
+                draw_body_pts(frameAnnotated, landmarks.back(), Scalar(255, 255, 0));
+            }
+            if(!skipFrame)
+            {
+                stringstream ss("");
+                ss << (string)LANDMARKS_DIR + LANDMARKS_FRAMES_FILENAME << landmarks.size()/4 -1 << ".bmp";
+                imwrite(ss.str().c_str(), frame);
             }
         }
     }
@@ -116,7 +141,7 @@ int main()
     cout << "Press space to save at " << LANDMARKS_FILENAME << endl;
     waitKey(0);
 
-    if(!write_data_pts(LANDMARKS_FILENAME, landmarks))
+    if(!write_data_pts((string)LANDMARKS_DIR + LANDMARKS_FILENAME, landmarks))
         cout << "ERROR: Could not open " << LANDMARKS_FILENAME << " for writing" << endl;
 
     return 0;

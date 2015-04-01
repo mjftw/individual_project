@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_layout_file>
 	<FileVersion major="1" minor="0" />
-	<ActiveProject path="collect_landmarks/collect_landmarks.cbp" />
+	<ActiveProject path="skydiver_blobs/skydiver_blobs.cbp" />
 	<PreferredTarget name="Debug" />
-	<EditorTabsLayout layout="09bac188551b29bc0001e2c700000002=*0;collect_landmarks:collect_landmarks.cpp,1;collect_landmarks:collect_landmarks.h,2;make_templates:make_templates.cpp@layout2|name=dummy;caption=;state=2098174;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=841;besth=380;minw=841;minh=380;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=09bac188551b29bc0001e2c700000002;caption=;state=2098172;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=200;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=202|" />
+	<EditorTabsLayout layout="09a18ed0551bd4a900c4c9a200000002=0;active_shape_model:active_shape_model.cpp,1;,2;collect_landmarks:collect_landmarks.cpp,3;make_templates:make_templates.cpp,4;extract_bg:extract_bg.cpp,*5;skydiver_blobs:skydiver_blobs.cpp@layout2|name=dummy;caption=;state=2098174;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=180;besth=180;minw=180;minh=180;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=09a18ed0551bd4a900c4c9a200000002;caption=;state=2098172;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=200;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=202|" />
 </CodeBlocks_workspace_layout_file>

@@ -106,7 +106,6 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="collect_landmarks.cpp" />
-		<Unit filename="collect_landmarks.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

@@ -14,7 +14,17 @@
 using namespace std;
 using namespace cv;
 
-#define LANDMARKS_FILENAME "../data/landmarks.txt"
+#define LANDMARKS_FILENAME "landmarks.txt"
+#define LANDMARKS_DIR "../data/landmarks/"
+#define LANDMARKS_FRAMES_FILENAME "landmarks_frame_"
+
+#define TEMPLATES_PATH "../data/templates/"
+#define TEMPLATES_IMG_LIST "imglist"
+#define TEMPLATES_NAME "template"
+#define SUBIMG_NAME "subimg"
+
+#define SRC_VID_PATH "../../Data/src/vid/4-way_fs_dive-pool.avi"
+#define BG_IMG_PATH "../../Data/src/img/tunnel-background.png"
 
 #define DEG2RAD 3.141592654/180
 #define RAD2DEG 3.141592654/180
@@ -64,6 +74,27 @@ inline string get_point_name(int pt)
         break;
     }
 }
+
+//ref_pt is the reference point used to calculate the angle for center_pt_name
+//when taking subimgs for templates
+inline int ref_pt(int center_pt_name)
+{
+    switch(center_pt_name)
+    {
+        case WAIST: return NECK;
+        case NECK: return WAIST;
+        case HEAD: return NECK;
+        case L_HAND: return L_ELBOW;
+        case L_ELBOW: return NECK;
+        case L_KNEE: return WAIST;
+        case L_FOOT: return L_KNEE;
+        case R_HAND: return R_ELBOW;
+        case R_ELBOW: return NECK;
+        case R_KNEE: return WAIST;
+        case R_FOOT: return R_KNEE;
+    }
+}
+
 inline double to_rads(double degs)
 {
     degs *= 3.141592654/180;
@@ -74,6 +105,18 @@ inline double to_degs(double rads)
 {
     rads *= 180/3.141592654;
     return rads;
+}
+
+inline Point2f rotate_pt(Point2f& pt, Point2f& origin, double angle, double scale=1)
+{
+    Point2f out;
+    out = pt - origin;
+    Point2f tmp;
+    out *= scale;
+    tmp.x = out.x*cos(angle) - out.y*sin(angle);
+    tmp.y = out.x*sin(angle) + out.y*cos(angle);
+    out = tmp + origin;
+    return out;
 }
 
 inline void find_contour_centroids(std::vector<std::vector<cv::Point> >& contours, std::vector<cv::Point>& output_array/*, bool hull=1*/)
@@ -320,14 +363,33 @@ inline void PCA_load(PCA& pca, string path)
     fs.release();
 }
 
+inline void PCA_constrain(Mat& eigenvalues)
+{
+    int maxStdDevs = 3;
+    //*TODO work out correct type for .at<T_>(), float looses accuracy.
+    cout << eigenvalues << endl;
+    float eigenvalue;
+    for(int i=0; i<eigenvalues.rows; i++)
+    {   //box constraint
+        eigenvalue = eigenvalues.at<float>(0,i);
+
+        if(eigenvalue > maxStdDevs)
+            eigenvalue = maxStdDevs;
+        else if(eigenvalue < -maxStdDevs)
+            eigenvalue = -maxStdDevs;
+
+        eigenvalues.at<float>(0,i) = eigenvalue;
+    }
+}
+
 inline Point Point2f_to_Point(Point2f pt)
 {
-    return Point((int)pt.x, (int)pt.y);
+    return Point(floor(pt.x + 0.5), (floor(pt.y + 0.5)));
 }
 
 inline Point2f Point_to_Point2f(Point pt)
 {
-    return Point(floor(pt.x + 0.5), (floor(pt.y + 0.5)));
+    return Point2f((float)pt.x, (float)pt.y);
 }
 
 inline vector<Point> Point2f_to_Point_vec(vector<Point2f>& pts)
@@ -352,25 +414,116 @@ inline void draw_angle(Mat& img, Point2f& pt, double theta, Scalar colour = Scal
     line(img, pt, Point(pt.x + length*cos(to_rads(theta)), pt.y + length*sin(to_rads(theta))), colour, 2);
 }
 
-inline Mat get_subimg(Mat& src, Point2f& center_pt, Point2f& ref_pt, int box_size)
+inline double get_angle(Point2f& pt1, Point2f& pt2, bool use_degrees=true)
+{
+    double theta = atan2(pt2.y - pt1.y, pt2.x - pt1.x);
+    if(use_degrees)
+        theta = to_degs(theta);
+    return theta;
+}
+
+inline Mat get_subimg(Mat& src, Point2f& center_pt, Point2f& ref_pt, int box_size, double angle=0)
 {   /*TODO add code to only use & rotate bounding rectangle for speed*/
-    Mat dst, rotMat, bounding, rotated, cropped;
-    float theta = to_degs(atan2(ref_pt.y - center_pt.y, ref_pt.x - center_pt.x));
+    Mat rotMat, bounding, rotated, cropped;
+
+    float theta = (!angle)? get_angle(center_pt, ref_pt):angle;
     RotatedRect rotRect(center_pt, Size(box_size, box_size), theta);
 
-    rotMat = getRotationMatrix2D(rotRect.center, theta-90, 1.0);
+    Point2f rectVerts[4];
+    rotRect.points(rectVerts);
+
+    vector<Point2f> rectVertsVec;
+    for(int i=0; i<4; i++)
+        rectVertsVec.push_back(rectVerts[i]);
+    bounding = src(boundingRect(rectVertsVec));
+
+    rotMat = getRotationMatrix2D(rotRect.center, theta, 1.0);
     warpAffine(src, rotated, rotMat, src.size(), INTER_CUBIC);
+
     getRectSubPix(rotated, Size(box_size, box_size), rotRect.center, cropped);
 
-//    resize(cropped, cropped, Size(), 2, 2, INTER_CUBIC); // upscale 2x
-
 //// Uncomment in order to see the rotated rectangles on the frames
-//    Point2f rectVerts[4];
-//    rotRect.points(rectVerts);
 //    for(int i=0; i<4; i++)
 //        line(src, rectVerts[i], rectVerts[(i+1)%4], Scalar(255,255,255));
 
-    return dst;
+    return cropped;
 }
 
+inline Point2f template_match_point(Mat& src, Mat& templ, int search_range, vector<Point2f> pts, int center_pt_name, int method = CV_TM_CCORR, double* matchScore=0)
+{
+    Point2f bestMatchPt;
+    Point2f center = pts[center_pt_name];
+    Point2f refPt = pts[ref_pt(center_pt_name)];
+
+    Mat searchArea = get_subimg(src, center, refPt, templ.rows + 2*search_range);
+    Mat searchResult;
+    matchTemplate(searchArea, templ, searchResult, method);
+
+    Point maxPt;
+    minMaxLoc(searchResult, 0, matchScore, 0, &maxPt);
+
+    //move point back to original space
+    Point2f maxPt2f = Point2f_to_Point(maxPt);
+    maxPt2f = rotate_pt(maxPt2f, center, 0-get_angle(center, refPt));
+    maxPt2f += center;
+
+    return maxPt2f;
+}
+
+inline vector<vector<Point> > get_skydiver_blobs(Mat& frame, Mat& bg, Mat& dst, int medianFilerSize=5, int medianFilerShape=MORPH_RECT, bool use_contours=true, bool use_sdt_dev=false, double min_std_devs=2)
+{
+        cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
+        frame = cv::abs(frame - bg);
+        threshold(frame, frame, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU); //Adaptive thresholding
+
+        median_filter_binary(frame, frame, medianFilerSize, medianFilerShape);
+
+        vector<vector<Point> > contours;
+
+        if(use_contours)
+        {
+            Mat holes(frame.size(), frame.type(), Scalar(0));
+
+            if(use_sdt_dev)
+            {
+                vector<Vec4i> hierarchy;
+                findContours(frame, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+
+                for(int idx=0; idx >= 0; idx = hierarchy[idx][0])
+                    drawContours(holes, contours, idx, Scalar(255), CV_FILLED, 8, hierarchy);
+
+                double mean = 0;
+                double variance = 0;
+                double stdDev = 0;
+                double area[contours.size()];
+                for(int i=0; i<contours.size(); i++)
+                {
+                    area[i] = contourArea(contours[i]);
+                    mean += area[i];
+                }
+                mean /= contours.size();
+
+                for(int i=0; i<contours.size(); i++)
+                    variance += (area[i] - mean)*(area[i] - mean);
+                variance /= contours.size();
+                stdDev = sqrt(variance);
+
+                vector<vector<Point> > newContours;
+                for(int i=0; i<contours.size(); i++)
+                    if(area[i] > min_std_devs*stdDev)
+                        newContours.push_back(contours[i]);
+                frame = Scalar(0);
+                drawContours(frame, newContours, -1, Scalar(255), -1);
+                frame = frame & holes;
+            }
+            else
+            {
+                findContours(frame, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+                frame = Scalar(0);
+                drawContours(frame, contours, -1, Scalar(255), -1);
+            }
+        }
+        dst = frame.clone();
+        return contours;
+}
 #endif //MW_LIBCV_H

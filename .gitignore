@@ -7,3 +7,7 @@
 ########
 *.avi
 *.mp4
+
+#Code::Blocks Stuff#
+####################
+*.layout
