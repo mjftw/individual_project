@@ -92,7 +92,6 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="../mw_libCV.h" />
 		<Unit filename="skydiver_blobs.cpp" />
 		<Unit filename="skydiverblob.cpp" />
 		<Unit filename="skydiverblob.h" />

@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="data_label" />
+		<Option title="collect_landmarks" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
@@ -105,8 +105,8 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="data_label.h" />
-		<Unit filename="main.cpp" />
+		<Unit filename="collect_landmarks.cpp" />
+		<Unit filename="collect_landmarks.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

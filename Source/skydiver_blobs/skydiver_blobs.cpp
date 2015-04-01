@@ -46,10 +46,43 @@ void find_skydiver_blobs(Mat& binary_src, vector<vector<Point> >& skydiver_blob_
     return;
 }
 
+void rotate_mat(Mat& src, Mat& dst, double angle, double scale=1)
+{
+    Point2f center = Point2f(src.rows/2, src.cols/2);
+    Mat rotMatrix = getRotationMatrix2D(center, angle, scale);
+    warpAffine(src, dst, rotMatrix, src.size());
+}
+
+vector<Point2f> rotate_pts(vector<Point2f>& pts, double angle, double scale=1, bool use_radians=false)
+{
+    if(!use_radians)
+        angle *= (3.141592654/180);
+
+    vector<Point2f> dst;
+    Point2f mean = get_vec_centroid(pts);
+
+    for(int i=0; i<pts.size(); i++)
+    {
+        Point2f pt = pts[i] - mean;
+        Point2f tmp;
+        cout << "pt" << i << ": " << pt.x << ", " << pt.y << endl;
+        pt *= scale;
+        tmp.x = pt.x*cos(angle) - pt.y*sin(angle);
+        tmp.y = pt.x*sin(angle) + pt.y*cos(angle);
+        tmp += mean;
+        dst.push_back(tmp);
+    }
+
+    return dst;
+}
+
 int main()
 {
     Mat dst, src = imread("skydiver_blobs_unconnected1.png", CV_LOAD_IMAGE_GRAYSCALE);
     vector<vector<Point> > skydiverBlobContours;
+
+    PCA pca;
+    PCA_load(pca, "../../Data/out/PCA.yml");
 
     namedWindow("Window", CV_WINDOW_NORMAL);
     imshow("Window", src);
@@ -65,52 +98,58 @@ int main()
     Mat skydiverBlobs[4];
     SkydiverBlob skydivers[4];
 
+
     for(int i=0; i<4; i++)
         skydivers[i].approx_parameters(skydiverBlobContours[i], src.rows, src.cols);
 
     vector<vector<Point2f> > meanPointsVec;
     if(!load_data_pts("data_points_mean.txt", meanPointsVec))
         cout << "Could not open mean data points file." << endl;
+
     vector<Point2f> meanPoints = meanPointsVec[0];
 
-    double meanScaleMetric = get_scale_metric(meanPoints);
-    Point2f meanCentroid = get_vec_centroid(meanPoints);
     Mat meanPointsMat(meanPoints);
+
+    vector<vector<Point2f> > GPAPoints;
+    if(!load_data_pts("data_points_mean.txt", GPAPoints))
+        cout << "Could not open mean data points file." << endl;
+
+    vector<Mat> GPAPointsMat;
+    for(int i=0; i< GPAPoints.size(); i++)
+        GPAPointsMat.push_back(Mat(GPAPoints));
+
+//    Mat GPAPointsMatPCA = formatImagesForPCA(GPAPointsMat);
+//    Mat projected =  pca.project(GPAPointsMatPCA.row(0));
+
+
+
+    double meanScaleMetric = get_scale_metric(meanPointsMat);
+    Point2f meanCentroid = get_vec_centroid(meanPoints);
     double meanOrientation = get_major_axis(meanPointsMat);
 
     cout << "meanScaleMetric: " << meanScaleMetric;
     cout << ", meanCentroid: " <<  meanCentroid;
     cout << ", meanOrientation: " << meanOrientation << endl;
 
-    double initialScale[4];
-    Point2f initialTranslation[4];
-    double initialRotation[4];
-    Mat initialModelFitMat[4];
     vector<vector<Point2f> > initialModelFit(4);
-
 
     for(int i=0; i<4; i++) //For each skydiver blob
     {
-        initialScale[i] = skydivers[i].scaleMetric/meanScaleMetric;
-        initialTranslation[i] = skydivers[i].centroid - meanCentroid;
-        initialRotation[i] = skydivers[i].orientation - meanOrientation;
+        double initialScale = skydivers[i].scaleMetric/meanScaleMetric;
+        Point2f initialTranslation = skydivers[i].centroid - meanCentroid;
+        double initialRotation = skydivers[i].orientation - meanOrientation;
 
-        initialModelFitMat[i] = meanPointsMat;
-//        initialModelFitMat[i] *= initialScale[i];
-        initialModelFitMat[i] += Scalar(initialTranslation[i].x, initialTranslation[i].y);
+        Mat initialModelFitMat = meanPointsMat.clone();
+        initialModelFitMat += Scalar(initialTranslation.x, initialTranslation.y);
 
-        cout << "scale: " << initialScale[i];
-        cout << ", translation: " << initialTranslation[i];
-        cout << ", rotation: " << initialRotation[i] << endl;
+        initialModelFitMat.reshape(2).copyTo(initialModelFit[i]);
 
-        cout << initialModelFitMat[i] << endl;
-
-        initialModelFitMat[i].reshape(2).copyTo(initialModelFit[i]);
+        initialModelFit[i] = rotate_pts(initialModelFit[i], initialRotation, initialScale);
 
         //Output
-        Mat params = skydivers[i].paramaters_image();
+        Mat params = skydivers[i].paramaters_image().clone();
         Scalar colour(128);
-        plot_pts(params, initialModelFit[i], colour);
+        draw_body_pts(params, initialModelFit[i], colour);
 
         imshow("Window", params);
 

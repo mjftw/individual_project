@@ -22,6 +22,9 @@ class SkydiverBlob
         double orientation;
         double scaleMetric;
         cv::Point2f translation; //translation offset
+
+    private:
+        bool check_orientation();
 };
 
 #endif // SKYDIVERBLOB_H

@@ -19,22 +19,48 @@ void SkydiverBlob::approx_parameters(std::vector<cv::Point> Contour, int Src_row
     this->mask = temp.clone();
     this->contour = Contour;
 
-    this->orientation = get_major_axis(this->mask);
+    Mat contourMat(Contour);
     this->centroid = get_centroid(this->mask);
-    vector<Point2f> contour2f;
-    Mat(this->contour).copyTo(contour2f);
-    this->scaleMetric = get_scale_metric(contour2f);
+    this->scaleMetric = get_scale_metric(contourMat);
+    this->orientation = get_major_axis(contourMat);
+    if(check_orientation())
+        this->orientation = (this->orientation > 180)? this->orientation - 180 :this->orientation + 180 ;
+
 
     return;
+}
+/*TODO Work out why this doesn't work.*/
+bool SkydiverBlob::check_orientation()
+{
+    int upLength;
+    int downLength;
+    int n = 4; //number of points to move point each time
+    Point pt;
+
+    for(upLength=0, pt = this->centroid; this->mask.at<char>(pt) != 0; pt = Point(pt.x + n*cos(to_rads(this->orientation)),
+                                                                                  pt.y + n*sin(to_rads(this->orientation))))
+        upLength++;
+
+    line(this->mask, this->centroid, pt, Scalar(70), 5);
+
+    for(downLength=0, pt = this->centroid; this->mask.at<char>(pt) != 0; pt = Point(pt.x - n*cos(to_rads(this->orientation)),
+                                                                                    pt.y - n*sin(to_rads(this->orientation))))
+        downLength++;
+
+    line(this->mask, this->centroid, pt, Scalar(190), 5);
+
+    cout << "upLength: " << upLength << endl;
+    cout << "downLength: " << downLength << endl;
+
+    return (upLength < downLength);
 }
 
 cv::Mat SkydiverBlob::paramaters_image()
 {
     cv::Mat dst = this->mask.clone();
 
-    cv::circle(dst, this->centroid, 7, cv::Scalar(128), 2);
-    int l = 50;// line length
-    cv::line(dst, this->centroid, cv::Point(this->centroid.x + l*cos(orientation), this->centroid.y + l*sin(orientation)), cv::Scalar(128), 2);
+    draw_angle(dst, this->centroid, this->orientation);
+
 
     std::stringstream text("");
 
