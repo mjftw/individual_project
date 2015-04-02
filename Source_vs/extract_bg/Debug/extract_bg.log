@@ -1,0 +1,67 @@
+﻿Build started 02/04/2015 23:53:17.
+     1>Project "D:\Libaries\Uni Work\Year 3\Part III Project\Source_vs\extract_bg\extract_bg.vcxproj" on node 4 (Build target(s)).
+     1>ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I..\..\external_libs\OpenCV\include /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt extract_bg.cpp
+         extract_bg.cpp
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(111): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(112): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(113): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(114): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(115): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(116): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(117): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(118): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(119): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(152): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(153): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(154): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(155): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(156): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(157): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(158): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(159): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(160): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(227): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(228): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(229): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(230): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(231): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(232): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(233): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(234): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(235): warning C4800: 'uchar' : forcing value to bool 'true' or 'false' (performance warning)
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(262): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(263): warning C4244: '+=' : conversion from 'double' to 'int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(266): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(278): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(326): warning C4244: 'initializing' : conversion from 'double' to 'const int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(327): warning C4244: 'initializing' : conversion from 'double' to 'const int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\extract_bg.h(328): warning C4244: 'initializing' : conversion from 'double' to 'const int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(120): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(121): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(133): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(137): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(150): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(181): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(198): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(200): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(207): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(222): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(274): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(294): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(346): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(347): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(404): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(406): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(443): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(454): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(462): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(463): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(470): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\extract_bg\../mw_libCV.h(485): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>extract_bg.cpp(48): error C3861: 'get_skydiver_blobs': identifier not found
+     1>Done Building Project "D:\Libaries\Uni Work\Year 3\Part III Project\Source_vs\extract_bg\extract_bg.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:00.63

@@ -105,6 +105,7 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="../mw_libCV.h" />
 		<Unit filename="collect_landmarks.cpp" />
 		<Extensions>
 			<code_completion />

@@ -107,6 +107,7 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="../mw_libCV.h" />
 		<Unit filename="extract_bg.cpp" />
 		<Unit filename="extract_bg.h" />
 		<Extensions>

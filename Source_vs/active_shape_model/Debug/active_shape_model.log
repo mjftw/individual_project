@@ -1,0 +1,59 @@
+﻿Build started 03/04/2015 00:06:00.
+     1>Project "D:\Libaries\Uni Work\Year 3\Part III Project\Source_vs\active_shape_model\active_shape_model.vcxproj" on node 5 (Build target(s)).
+     1>ClCompile:
+         D:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I..\..\external_libs\OpenCV\include /Zi /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt active_shape_model.cpp
+         active_shape_model.cpp
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(120): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(121): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(133): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(137): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(150): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(181): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(198): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(200): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(207): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(222): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(274): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(294): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(346): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(347): warning C4244: 'argument' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(404): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(406): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(443): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(454): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(462): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(463): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(470): warning C4244: 'argument' : conversion from 'double' to 'int', possible loss of data
+     1>d:\libaries\uni work\year 3\part iii project\source_vs\active_shape_model\../mw_libCV.h(485): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+     1>active_shape_model.cpp(87): error C2057: expected constant expression
+     1>active_shape_model.cpp(87): error C2466: cannot allocate an array of constant size 0
+     1>active_shape_model.cpp(87): error C2133: 'component' : unknown size
+     1>active_shape_model.cpp(109): error C2057: expected constant expression
+     1>active_shape_model.cpp(109): error C2466: cannot allocate an array of constant size 0
+     1>active_shape_model.cpp(109): error C2133: 'descriptors' : unknown size
+     1>active_shape_model.cpp(111): warning C4244: '=' : conversion from 'int' to 'float', possible loss of data
+     1>active_shape_model.cpp(162): warning C4018: '<' : signed/unsigned mismatch
+     1>active_shape_model.cpp(178): warning C4018: '<' : signed/unsigned mismatch
+     1>active_shape_model.cpp(196): warning C4018: '<' : signed/unsigned mismatch
+     1>active_shape_model.cpp(230): error C2664: 'void std::vector<cv::Mat,std::allocator<_Ty>>::push_back(const cv::Mat &)' : cannot convert argument 1 from 'std::vector<std::vector<cv::Point2f,std::allocator<_Ty>>,std::allocator<std::vector<_Ty,std::allocator<_Ty>>>>' to 'cv::Mat &&'
+                 with
+                 [
+                     _Ty=cv::Mat
+                 ]
+                 and
+                 [
+                     _Ty=cv::Point2f
+                 ]
+                 Reason: cannot convert from 'std::vector<std::vector<cv::Point2f,std::allocator<_Ty>>,std::allocator<std::vector<_Ty,std::allocator<_Ty>>>>' to 'cv::Mat'
+                 with
+                 [
+                     _Ty=cv::Point2f
+                 ]
+                 No user-defined-conversion operator available that can perform this conversion, or the operator cannot be called
+     1>active_shape_model.cpp(231): error C2065: 'testDataPCA' : undeclared identifier
+     1>active_shape_model.cpp(233): error C2065: 'testDataPCA' : undeclared identifier
+     1>Done Building Project "D:\Libaries\Uni Work\Year 3\Part III Project\Source_vs\active_shape_model\active_shape_model.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:00.60
