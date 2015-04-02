@@ -23,36 +23,32 @@ void SkydiverBlob::approx_parameters(std::vector<cv::Point> Contour, int Src_row
     this->centroid = get_centroid(this->mask);
     this->scaleMetric = get_scale_metric(contourMat);
     this->orientation = get_major_axis(contourMat);
-    if(check_orientation())
-        this->orientation = (this->orientation > 180)? this->orientation - 180 :this->orientation + 180 ;
-
+    check_orientation();
 
     return;
 }
-/*TODO Work out why this doesn't work.*/
-bool SkydiverBlob::check_orientation()
+
+void SkydiverBlob::check_orientation()
 {
     int upLength;
     int downLength;
     int n = 4; //number of points to move point each time
+    int l = 0;
     Point pt;
 
-    for(upLength=0, pt = this->centroid; this->mask.at<char>(pt) != 0; pt = Point(pt.x + n*cos(to_rads(this->orientation)),
-                                                                                  pt.y + n*sin(to_rads(this->orientation))))
-        upLength++;
+    for(upLength=0, l=0, pt = this->centroid; this->mask.at<char>(pt) != 0;pt = Point(this->centroid.x + l*cos(to_rads(this->orientation)),
+                                                                                          this->centroid.y + l*sin(to_rads(this->orientation))))
+        l += n;
+    upLength = l;
 
-    line(this->mask, this->centroid, pt, Scalar(70), 5);
+    for(l=0, pt = this->centroid; this->mask.at<char>(pt) != 0; l += n, pt = Point(this->centroid.x - l*cos(to_rads(this->orientation)),
+                                                                                          this->centroid.y - l*sin(to_rads(this->orientation))))
+        l += n;
+    downLength = l;
 
-    for(downLength=0, pt = this->centroid; this->mask.at<char>(pt) != 0; pt = Point(pt.x - n*cos(to_rads(this->orientation)),
-                                                                                    pt.y - n*sin(to_rads(this->orientation))))
-        downLength++;
+    if(upLength < downLength)
+        this->orientation += ((this->orientation > 180)? -180:180);
 
-    line(this->mask, this->centroid, pt, Scalar(190), 5);
-
-    cout << "upLength: " << upLength << endl;
-    cout << "downLength: " << downLength << endl;
-
-    return (upLength < downLength);
 }
 
 cv::Mat SkydiverBlob::paramaters_image()

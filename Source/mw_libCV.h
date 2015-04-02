@@ -18,6 +18,8 @@ using namespace cv;
 #define LANDMARKS_DIR "../data/landmarks/"
 #define LANDMARKS_FRAMES_FILENAME "landmarks_frame_"
 
+#define PCA_FILENAME "../data/PCA.xml"
+
 #define TEMPLATES_PATH "../data/templates/"
 #define TEMPLATES_IMG_LIST "imglist"
 #define TEMPLATES_NAME "template"
@@ -31,6 +33,7 @@ using namespace cv;
 
 //Body points definitions
 enum{WAIST=0,NECK=1,HEAD=2,L_HAND=3,L_ELBOW=4,L_KNEE=5, L_FOOT=6,R_FOOT=7,R_KNEE=8,R_ELBOW=9,R_HAND=10};
+enum{PCA_ELLIPSOID, PCA_BOX};
 
 inline string get_point_name(int pt)
 {
@@ -363,22 +366,32 @@ inline void PCA_load(PCA& pca, string path)
     fs.release();
 }
 
-inline void PCA_constrain(Mat& eigenvalues)
+inline void PCA_constrain(Mat& P, PCA& pca, int mode=PCA_BOX, double k=3)
 {
-    int maxStdDevs = 3;
+    //E = eigenvalues, P = projected data
     //*TODO work out correct type for .at<T_>(), float looses accuracy.
-    cout << eigenvalues << endl;
-    float eigenvalue;
-    for(int i=0; i<eigenvalues.rows; i++)
-    {   //box constraint
-        eigenvalue = eigenvalues.at<float>(0,i);
 
-        if(eigenvalue > maxStdDevs)
-            eigenvalue = maxStdDevs;
-        else if(eigenvalue < -maxStdDevs)
-            eigenvalue = -maxStdDevs;
+    if(mode == PCA_BOX)
+    {
+        double nStdDevs = k;
+        for(int i=0; i<E.rows; i++)
+        {
+            double mult = nStdDevs*sqrt(E.at<float>(0,i));
+            if(P.at<float>(0,i) > mult)
+                P.at<float>(0,i) = mult;
+            else if(P.at<float>(0,i) < -mult)
+                P.at<float>(0,i) = -mult;
+        }
+    }
+    else if(mode == PCA_ELLIPSOID)
+    {
+        double dmax = k;
+        double dmsq = 0;
+        for(int i=0; i<E.rows; i++)
+            dmsq += (P.at<float>(0,i) * P.at<float>(0,i)) / E.at<float>(0,i);
 
-        eigenvalues.at<float>(0,i) = eigenvalue;
+        if(dmsq > dmax * dmax)
+            E *= dmax / sqrt(dmsq);
     }
 }
 
@@ -470,24 +483,22 @@ inline Point2f template_match_point(Mat& src, Mat& templ, int search_range, vect
     return maxPt2f;
 }
 
-inline vector<vector<Point> > get_skydiver_blobs(Mat& frame, Mat& bg, Mat& dst, int medianFilerSize=5, int medianFilerShape=MORPH_RECT, bool use_contours=true, bool use_sdt_dev=false, double min_std_devs=2)
+inline vector<vector<Point> > extract_fg(Mat& frame, Mat& bg, Mat& dst, int medianFilerSize=5, int medianFilerShape=MORPH_RECT, bool use_contours=true, bool use_sdt_dev=false, double min_std_devs=2)
 {
-        cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
-        frame = cv::abs(frame - bg);
-        threshold(frame, frame, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU); //Adaptive thresholding
-
-        median_filter_binary(frame, frame, medianFilerSize, medianFilerShape);
+        dst = cv::abs(frame - bg);
+        threshold(dst, dst, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU); //Adaptive thresholding
+        median_filter_binary(dst, dst, medianFilerSize, medianFilerShape);
 
         vector<vector<Point> > contours;
 
         if(use_contours)
         {
-            Mat holes(frame.size(), frame.type(), Scalar(0));
+            Mat holes(dst.size(), dst.type(), Scalar(0));
 
             if(use_sdt_dev)
             {
                 vector<Vec4i> hierarchy;
-                findContours(frame, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+                findContours(dst, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 
                 for(int idx=0; idx >= 0; idx = hierarchy[idx][0])
                     drawContours(holes, contours, idx, Scalar(255), CV_FILLED, 8, hierarchy);
@@ -512,18 +523,17 @@ inline vector<vector<Point> > get_skydiver_blobs(Mat& frame, Mat& bg, Mat& dst, 
                 for(int i=0; i<contours.size(); i++)
                     if(area[i] > min_std_devs*stdDev)
                         newContours.push_back(contours[i]);
-                frame = Scalar(0);
-                drawContours(frame, newContours, -1, Scalar(255), -1);
-                frame = frame & holes;
+                dst = Scalar(0);
+                drawContours(dst, newContours, -1, Scalar(255), -1);
+                dst = dst & holes;
             }
             else
             {
-                findContours(frame, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-                frame = Scalar(0);
-                drawContours(frame, contours, -1, Scalar(255), -1);
+                findContours(dst, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+                dst = Scalar(0);
+                drawContours(dst, contours, -1, Scalar(255), -1);
             }
         }
-        dst = frame.clone();
         return contours;
 }
 #endif //MW_LIBCV_H

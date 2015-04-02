@@ -221,11 +221,21 @@ int main()
 //    int nComponents = 5;
     double retainedVariance = 0.9;
     PCA pca(dataMatPCA, meanMatPCA, CV_PCA_DATA_AS_ROW, retainedVariance);
-    PCA_save(pca, "../../Data/out/PCA.yml");
+    PCA_save(pca, PCA_FILENAME);
 
-    PCA_constrain(pca.eigenvalues);
 
-    show_PCA_component_sliders(dataMatGPA, meanMat, 5, 100, -100);
+    namedWindow("constrain pts");
+
+
+    vector<Mat> testData;
+    testData.push_back(data);
+    testDataPCA = formatImagesForPCA(testData);
+
+    Mat testDataP = pca.project(testDataPCA);
+
+
+
+//    show_PCA_component_sliders(dataMatGPA, meanMat, 5, 100, -100);
 
 //    namedWindow("pcaShapeOp", WINDOW_AUTOSIZE);
 

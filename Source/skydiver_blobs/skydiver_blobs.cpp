@@ -24,26 +24,34 @@ inline bool contourSort(const vector<Point> contour1, const vector<Point> contou
     return (contourArea(contour1, false) > contourArea(contour2, false));
 }
 
-void find_skydiver_blobs(Mat& binary_src, vector<vector<Point> >& skydiver_blob_contours)
+bool find_4_skydiver_blobs(Mat& binary_src, Mat& dst, vector<vector<Point> >& skydiver_blob_contours)
 {
     vector<vector<Point> > connectedComponents;
     Mat temp;
 
     skydiver_blob_contours.clear();
-    threshold(binary_src, temp, 100, WHITE, THRESH_BINARY);
+    threshold(binary_src, temp, 0, WHITE, THRESH_BINARY | THRESH_OTSU);
 
     findContours(temp, connectedComponents, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point());
+
+    if(connectedComponents.size() < 4)
+        return false;
+
     sort(connectedComponents.begin(), connectedComponents.end(), contourSort);
 
     //*TODO* Need to make this work if less than 4 blobs.
     //This will be the case if the skydivers are too close & their blobs overlap
-    for(int i=0;i<4; i++)
+    for(int i=0;i<((connectedComponents.size() < 4)? connectedComponents.size():4) ; i++)
         skydiver_blob_contours.push_back(connectedComponents[i]);
 
-    binary_src = Scalar(BLACK);
-    drawContours(binary_src, skydiver_blob_contours, -1, Scalar(WHITE), -1);
+    dst = binary_src.clone();
+    dst = Scalar(BLACK);
+    drawContours(dst, skydiver_blob_contours, -1, Scalar(WHITE), -1);
 
-    return;
+    if(connectedComponents.size() == 4)
+        return true;
+    else
+        return false;
 }
 
 void rotate_mat(Mat& src, Mat& dst, double angle, double scale=1)
@@ -63,7 +71,13 @@ vector<Point2f> rotate_pts(vector<Point2f>& pts, double angle, double scale=1, b
 
     for(int i=0; i<pts.size(); i++)
     {
-        dst.push_back(rotate_pt(pts[i], mean, angle, scale));
+        Point2f pt = pts[i] - mean;
+        Point2f tmp;
+        pt *= scale;
+        tmp.x = pt.x*cos(angle) - pt.y*sin(angle);
+        tmp.y = pt.x*sin(angle) + pt.y*cos(angle);
+        tmp += mean;
+        dst.push_back(tmp);
     }
 
     return dst;
@@ -71,30 +85,41 @@ vector<Point2f> rotate_pts(vector<Point2f>& pts, double angle, double scale=1, b
 
 int main()
 {
-    VideoCapture srcVid(SRC_VID_PATH), dstVid;
-    Mat bg;
-    imread(BG_IMG_PATH);
+    VideoCapture srcVid(SRC_VID_PATH);
+    if(!srcVid.isOpened())
+    {
+        cout << "Cannot open video file " << SRC_VID_PATH << endl;
+        exit(EXIT_FAILURE);
+    }
 
     PCA pca;
-    PCA_load(pca, "../../Data/out/PCA.yml");
+    PCA_load(pca, PCA_FILENAME);
 
-    namedWindow("Window", CV_WINDOW_NORMAL);
-    namedWindow("Contours", CV_WINDOW_NORMAL);
+    Mat frame, fgMask;
+    Mat bg = imread(BG_IMG_PATH, CV_LOAD_IMAGE_GRAYSCALE);
+    Mat skydiverBlobs;
 
-    Mat frame;
+    vector<vector<Point> > skydiverBlobContours;
+
+//    Mat contourImg;
+//    overlay_contours(skydiverBlobs, contourImg, skydiverBlobContours);
+//    imshow("Window", skydiverBlobs);
+//    waitKey(0);
+
     for(srcVid.read(frame); srcVid.read(frame);)
     {
-        vector<vector<Point> > skydiverBlobContours = get_skydiver_blobs(frame, bg, frame);
+        do
+        {
+            if(!srcVid.read(frame))
+                continue;
+            cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
+            extract_fg(frame, bg, fgMask, 7, MORPH_ELLIPSE, true, true);
+        }while(!find_4_skydiver_blobs(fgMask, skydiverBlobs, skydiverBlobContours));
 
-        Mat contours;
-        overlay_contours(frame, contours, skydiverBlobContours);
-        imshow("Contours", contours);
-
-        Mat skydiverBlobs[4];
         SkydiverBlob skydivers[4];
 
         for(int i=0; i<4; i++)
-            skydivers[i].approx_parameters(skydiverBlobContours[i], frame.rows, frame.cols);
+            skydivers[i].approx_parameters(skydiverBlobContours[i], skydiverBlobs.rows, skydiverBlobs.cols);
 
         vector<vector<Point2f> > meanPointsVec;
         if(!load_data_pts("data_points_mean.txt", meanPointsVec))
@@ -115,17 +140,12 @@ int main()
     //    Mat GPAPointsMatPCA = formatImagesForPCA(GPAPointsMat);
     //    Mat projected =  pca.project(GPAPointsMatPCA.row(0));
 
-
-
         double meanScaleMetric = get_scale_metric(meanPointsMat);
         Point2f meanCentroid = get_vec_centroid(meanPoints);
         double meanOrientation = get_major_axis(meanPointsMat);
 
-        cout << "meanScaleMetric: " << meanScaleMetric;
-        cout << ", meanCentroid: " <<  meanCentroid;
-        cout << ", meanOrientation: " << meanOrientation << endl;
-
         vector<vector<Point2f> > initialModelFit(4);
+        Mat skydiverBlobsParams(skydiverBlobs.size(), skydiverBlobs.type(), Scalar(0,0,0));
 
         for(int i=0; i<4; i++) //For each skydiver blob
         {
@@ -144,24 +164,18 @@ int main()
             Mat params = skydivers[i].paramaters_image().clone();
             Scalar colour(128);
             draw_body_pts(params, initialModelFit[i], colour);
+//            if(skydivers[i].flag)
+                skydiverBlobsParams += params;
+//            draw_angle(skydiverBlobs, skydivers[i].centroid, skydivers[i].orientation);
 
-            imshow("Window", params);
+    //        stringstream numSS("");
+    //        numSS << i;
+    //        imwrite("blob_params_" + numSS.str() + ".jpg", params);
 
-            stringstream numSS("");
-            numSS << i;
-            imwrite("blob_params_" + numSS.str() + ".jpg", params);
-            waitKey(1);
         }
+        imshow("Window", skydiverBlobsParams);
+        waitKey(100);
     }
-
 
    return 0;
 }
-
-
-
-
-
-
-
-

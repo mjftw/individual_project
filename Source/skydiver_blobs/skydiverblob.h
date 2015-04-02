@@ -24,7 +24,7 @@ class SkydiverBlob
         cv::Point2f translation; //translation offset
 
     private:
-        bool check_orientation();
+        void check_orientation();
 };
 
 #endif // SKYDIVERBLOB_H

@@ -6,5 +6,6 @@
 		<Project filename="extract_bg/extract_bg.cbp" />
 		<Project filename="fs_recognition/fs_recognition.cbp" />
 		<Project filename="collect_landmarks/collect_landmarks.cbp" />
+		<Project filename="make_templates/make_templates.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

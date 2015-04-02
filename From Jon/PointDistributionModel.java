@@ -50,14 +50,14 @@ import Jama.Matrix;
  * A 2d point distribution model learnt from a set of {@link PointList}s with
  * corresponding points (the ith point in each {@link PointList} is the same
  * landmark).
- * 
+ *
  * The pdm models the mean shape and the variance from the mean of the top N
  * principal components. The model is generative and can generate new shapes
  * from a scaling vector. To ensure that newly generated shapes are plausible,
  * scaling vectors have {@link Constraint}s applied to them.
- * 
+ *
  * @author Jonathon Hare (jsh2@ecs.soton.ac.uk)
- * 
+ *
  */
 @References(references = {
 		@Reference(
@@ -81,14 +81,14 @@ public class PointDistributionModel {
 	/**
 	 * Interface for modelling constraints applied to the scaling vector of
 	 * {@link PointDistributionModel}s so that generated models are plausible.
-	 * 
+	 *
 	 * @author Jonathon Hare (jsh2@ecs.soton.ac.uk)
 	 */
 	public interface Constraint {
 		/**
 		 * Apply constraints to a scaling vector so that it will generated a
 		 * plausible model and return the new constrained vector.
-		 * 
+		 *
 		 * @param scaling
 		 *            the scaling vector to constrain
 		 * @param lamda
@@ -100,9 +100,9 @@ public class PointDistributionModel {
 
 	/**
 	 * A constraint that does nothing.
-	 * 
+	 *
 	 * @author Jonathon Hare (jsh2@ecs.soton.ac.uk)
-	 * 
+	 *
 	 */
 	public static class NullConstraint implements Constraint {
 		@Override
@@ -114,16 +114,16 @@ public class PointDistributionModel {
 	/**
 	 * A constraint that ensures that each individual element of the scaling
 	 * vector is within +/- x standard deviations of the model.
-	 * 
+	 *
 	 * @author Jonathon Hare (jsh2@ecs.soton.ac.uk)
-	 * 
+	 *
 	 */
 	public static class BoxConstraint implements Constraint {
 		double multiplier;
 
 		/**
 		 * Construct with the given multiplier of the standard deviation.
-		 * 
+		 *
 		 * @param multiplier
 		 */
 		public BoxConstraint(double multiplier) {
@@ -131,12 +131,14 @@ public class PointDistributionModel {
 		}
 
 		@Override
-		public double[] apply(double[] in, double[] lamda) {
+		public double[] apply(double[] in, double[] lamda)
+		{
 			final double[] out = new double[in.length];
 
-			for (int i = 0; i < in.length; i++) {
+			for (int i = 0; i < in.length; i++)
+            {
 				final double w = multiplier * Math.sqrt(lamda[i]);
-				out[i] = in[i] > w ? w : in[i] < -w ? -w : in[i];
+				out[i] = (in[i] > w)? w:(in[i] < -w)? -w : in[i];
 			}
 
 			return out;
@@ -145,16 +147,16 @@ public class PointDistributionModel {
 
 	/**
 	 * Constrain the scaling vector to a hyper-ellipsoid.
-	 * 
+	 *
 	 * @author Jonathon Hare (jsh2@ecs.soton.ac.uk)
-	 * 
+	 *
 	 */
 	public static class EllipsoidConstraint implements Constraint {
 		double dmax;
 
 		/**
 		 * Construct with the given maximum normalised ellipsoid radius.
-		 * 
+		 *
 		 * @param dmax
 		 */
 		public EllipsoidConstraint(double dmax) {
@@ -191,7 +193,7 @@ public class PointDistributionModel {
 	/**
 	 * Construct a {@link PointDistributionModel} from the given data with a
 	 * {@link NullConstraint}.
-	 * 
+	 *
 	 * @param data
 	 */
 	public PointDistributionModel(List<PointList> data) {
@@ -201,7 +203,7 @@ public class PointDistributionModel {
 	/**
 	 * Construct a {@link PointDistributionModel} from the given data and
 	 * {@link Constraint}.
-	 * 
+	 *
 	 * @param constraint
 	 * @param data
 	 */
@@ -256,7 +258,7 @@ public class PointDistributionModel {
 
 	/**
 	 * Set the number of components of the PDM
-	 * 
+	 *
 	 * @param n
 	 *            number of components
 	 */
@@ -268,7 +270,7 @@ public class PointDistributionModel {
 	/**
 	 * Set the number of components of the PDM using a {@link ComponentSelector}
 	 * .
-	 * 
+	 *
 	 * @param selector
 	 *            the {@link ComponentSelector} to apply.
 	 */
@@ -281,7 +283,7 @@ public class PointDistributionModel {
 	 * Generate a plausible new shape from the scaling vector. The scaling
 	 * vector is constrained by the underlying {@link Constraint} before being
 	 * used to generate the model.
-	 * 
+	 *
 	 * @param scaling
 	 *            scaling vector.
 	 * @return a new shape
@@ -304,7 +306,7 @@ public class PointDistributionModel {
 	/**
 	 * Compute the standard deviations of the shape components, multiplied by
 	 * the given value.
-	 * 
+	 *
 	 * @param multiplier
 	 *            the multiplier
 	 * @return the multiplied standard deviations
@@ -321,7 +323,7 @@ public class PointDistributionModel {
 
 	/**
 	 * Determine the best parameters of the PDM for the given model.
-	 * 
+	 *
 	 * @param observed
 	 *            the observed model.
 	 * @return the parameters that best fit the model.
