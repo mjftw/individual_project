@@ -128,7 +128,6 @@ void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_comp
 
         putText(pcaShapeOp, ss.str().c_str(), Point(5, 30), FONT_HERSHEY_SIMPLEX, 0.8, Scalar(128, 128, 128));
 
-
         if(CLICKED)
         {
             putText(pcaShapeOp, "Constrain", Point(pcaShapeOp.cols - 149,31 ), FONT_HERSHEY_SIMPLEX, 0.8, Scalar(128, 128, 128));

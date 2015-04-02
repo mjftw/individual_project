@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_layout_file>
 	<FileVersion major="1" minor="0" />
-	<ActiveProject path="make_templates/make_templates.cbp" />
+	<ActiveProject path="skydiver_blobs/skydiver_blobs.cbp" />
 	<PreferredTarget name="Debug" />
-	<EditorTabsLayout layout="09b92ff0551c5bfa0000c8a400000002=*0;skydiver_blobs:skydiver_blobs.cpp,1;,2;skydiver_blobs:skydiverblob.cpp,3;skydiver_blobs:skydiverblob.h,4;active_shape_model:active_shape_model.cpp@layout2|name=dummy;caption=;state=2098174;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=180;besth=180;minw=180;minh=180;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=09b92ff0551c5bfa0000c8a400000002;caption=;state=2098172;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=200;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=202|" />
+	<EditorTabsLayout layout="09b92ff0551c5bfa0000c8a400000002=*0;skydiver_blobs:skydiver_blobs.cpp,1;,2;skydiver_blobs:skydiverblob.cpp,3;skydiver_blobs:skydiverblob.h,4;active_shape_model:active_shape_model.cpp,5;make_templates:make_templates.cpp@layout2|name=dummy;caption=;state=2098174;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=180;besth=180;minw=180;minh=180;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=09b92ff0551c5bfa0000c8a400000002;caption=;state=2098172;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=200;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=202|" />
 </CodeBlocks_workspace_layout_file>

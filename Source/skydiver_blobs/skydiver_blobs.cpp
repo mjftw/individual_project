@@ -106,6 +106,34 @@ int main()
 //    imshow("Window", skydiverBlobs);
 //    waitKey(0);
 
+    vector<vector<Point2f> > meanPointsVec;
+    if(!load_data_pts("data_points_mean.txt", meanPointsVec))
+        cout << "Could not open mean data points file." << endl;
+
+    vector<Point2f> meanPoints = meanPointsVec[0];
+
+    Mat meanPointsMat(meanPoints);
+
+    vector<vector<Point2f> > GPAPoints;
+    if(!load_data_pts("data_points_mean.txt", GPAPoints))
+        cout << "Could not open mean data points file." << endl;
+
+    vector<Mat> GPAPointsMat;
+    for(int i=0; i< GPAPoints.size(); i++)
+        GPAPointsMat.push_back(Mat(GPAPoints));
+
+//    Mat GPAPointsMatPCA = formatImagesForPCA(GPAPointsMat);
+//    Mat projected =  pca.project(GPAPointsMatPCA.row(0));
+
+    double meanScaleMetric = get_scale_metric(meanPointsMat);
+    Point2f meanCentroid = get_vec_centroid(meanPoints);
+    double meanOrientation = get_major_axis(meanPointsMat);
+
+
+
+
+
+
     for(srcVid.read(frame); srcVid.read(frame);)
     {
         do
@@ -121,28 +149,6 @@ int main()
         for(int i=0; i<4; i++)
             skydivers[i].approx_parameters(skydiverBlobContours[i], skydiverBlobs.rows, skydiverBlobs.cols);
 
-        vector<vector<Point2f> > meanPointsVec;
-        if(!load_data_pts("data_points_mean.txt", meanPointsVec))
-            cout << "Could not open mean data points file." << endl;
-
-        vector<Point2f> meanPoints = meanPointsVec[0];
-
-        Mat meanPointsMat(meanPoints);
-
-        vector<vector<Point2f> > GPAPoints;
-        if(!load_data_pts("data_points_mean.txt", GPAPoints))
-            cout << "Could not open mean data points file." << endl;
-
-        vector<Mat> GPAPointsMat;
-        for(int i=0; i< GPAPoints.size(); i++)
-            GPAPointsMat.push_back(Mat(GPAPoints));
-
-    //    Mat GPAPointsMatPCA = formatImagesForPCA(GPAPointsMat);
-    //    Mat projected =  pca.project(GPAPointsMatPCA.row(0));
-
-        double meanScaleMetric = get_scale_metric(meanPointsMat);
-        Point2f meanCentroid = get_vec_centroid(meanPoints);
-        double meanOrientation = get_major_axis(meanPointsMat);
 
         vector<vector<Point2f> > initialModelFit(4);
         Mat skydiverBlobsParams(skydiverBlobs.size(), skydiverBlobs.type(), Scalar(0,0,0));

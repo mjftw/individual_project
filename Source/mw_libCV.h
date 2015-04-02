@@ -366,6 +366,7 @@ inline void PCA_load(PCA& pca, string path)
     fs.release();
 }
 
+
 inline void PCA_constrain(Mat& P, PCA& pca, int mode=PCA_BOX, double k=3)
 {
     //E = eigenvalues, P = projected data
@@ -374,9 +375,9 @@ inline void PCA_constrain(Mat& P, PCA& pca, int mode=PCA_BOX, double k=3)
     if(mode == PCA_BOX)
     {
         double nStdDevs = k;
-        for(int i=0; i<E.rows; i++)
+        for(int i=0; i<pca.eigenvalues.rows; i++)
         {
-            double mult = nStdDevs*sqrt(E.at<float>(0,i));
+            double mult = nStdDevs*sqrt(pca.eigenvalues.at<float>(0,i));
             if(P.at<float>(0,i) > mult)
                 P.at<float>(0,i) = mult;
             else if(P.at<float>(0,i) < -mult)
@@ -387,12 +388,28 @@ inline void PCA_constrain(Mat& P, PCA& pca, int mode=PCA_BOX, double k=3)
     {
         double dmax = k;
         double dmsq = 0;
-        for(int i=0; i<E.rows; i++)
-            dmsq += (P.at<float>(0,i) * P.at<float>(0,i)) / E.at<float>(0,i);
+        for(int i=0; i<pca.eigenvalues.rows; i++)
+            dmsq += (P.at<float>(0,i) * P.at<float>(0,i)) / pca.eigenvalues.at<float>(0,i);
 
         if(dmsq > dmax * dmax)
-            E *= dmax / sqrt(dmsq);
+            pca.eigenvalues *= dmax / sqrt(dmsq);
     }
+}
+
+inline void PCA_constrain_data(vector<Point2f>& data, PCA& pca, int mode=PCA_BOX, double k=3)
+{
+    float dataArr[data.size()*2];
+    for(int i=0; i<data.size(); i++)
+    {
+        dataArr[2*i] = data[i].x;
+        dataArr[2*i +1] = data[i].y;
+    }
+    Mat dataMat(1, data.size()*2, CV_32F, &dataArr);
+    Mat dataP = pca.project(dataMat);
+    PCA_constrain(dataP, pca);
+    dataMat = pca.backProject(dataP);
+    //procrustes stuff here?
+    dataMat.copyTo(data);
 }
 
 inline Point Point2f_to_Point(Point2f pt)
