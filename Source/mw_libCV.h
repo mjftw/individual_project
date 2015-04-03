@@ -1,6 +1,5 @@
 /**
   Created by Merlin Webster.
-  University of Southampton
   Copyright (c) 2015 Merlin Webster. All rights reserved.
 */
 
@@ -349,27 +348,6 @@ inline Mat reformatImageFromPCA(Mat& img, int channels=1, int rows=11)
     return Mat(pts);
 }
 
-inline void PCA_backProject_pts(vector<Point2f> ptsP, vector<Point2f>& ptsOut, PCA& pca)
-{
-    float evals[pca.eigenvalues.rows];
-    for(int i=0; i<pca.eigenvalues.rows; i+=2)
-    {
-        evals[i] = ptsP[i].x;
-        evals[i+1] = ptsP[i].y;
-    }
-
-    Mat P(1, pca.eigenvalues.rows, CV_32F, &evals);
-    Mat bP = pca.backProject(P);
-
-    ptsOut.clear();
-    for(int i=0; i<bP.cols; i++)
-        ptsOut.push_back(Point2f(bP.at<float>(0,2*i), bP.at<float>(0,2*i+1)));
-}
-
-inline void PCA_project_pts(vector<Point2f> ptsIn, vector<Point2f>& ptsP, PCA& pca)
-{
-
-}
 inline void PCA_save(const PCA& pca, string path)
 {
     FileStorage fs(path, FileStorage::WRITE);
@@ -418,24 +396,20 @@ inline void PCA_constrain(Mat& P, PCA& pca, int mode=PCA_BOX, double k=3)
     }
 }
 
-inline void PCA_constrain_pts(vector<Point2f>& ptsIn, vector<Point2f>& ptsOut, PCA& pca, int mode=PCA_BOX, double k=3)
+inline void PCA_constrain_data(vector<Point2f>& data, PCA& pca, int mode=PCA_BOX, double k=3)
 {
-    float dataArr[ptsIn.size()*2];
-    for(int i=0; i<ptsIn.size(); i++)
+    float dataArr[data.size()*2];
+    for(int i=0; i<data.size(); i++)
     {
-        dataArr[2*i] = ptsIn[i].x;
-        dataArr[2*i +1] = ptsIn[i].y;
+        dataArr[2*i] = data[i].x;
+        dataArr[2*i +1] = data[i].y;
     }
-    Mat dataMat(1, ptsIn.size()*2, CV_32F, &dataArr);
+    Mat dataMat(1, data.size()*2, CV_32F, &dataArr);
     Mat dataP = pca.project(dataMat);
     PCA_constrain(dataP, pca);
     dataMat = pca.backProject(dataP);
     //procrustes stuff here?
-
-    ptsOut.clear();
-    for(int i=0; i<ptsIn.size(); i++)
-        ptsOut.push_back(Point2f(dataMat.at<float>(0,2*i), dataMat.at<float>(0,2*i+1)));
-
+    dataMat.copyTo(data);
 }
 
 inline Point Point2f_to_Point(Point2f pt)

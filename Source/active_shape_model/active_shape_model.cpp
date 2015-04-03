@@ -225,16 +225,16 @@ int main()
 
     namedWindow("constrain pts");
 
-//
-//    vector<Mat> testData;
-//    testData.push_back(data);
-//    testDataPCA = formatImagesForPCA(testData);
-//
-//    Mat testDataP = pca.project(testDataPCA);
+
+    vector<Mat> testData;
+    testData.push_back(data);
+    testDataPCA = formatImagesForPCA(testData);
+
+    Mat testDataP = pca.project(testDataPCA);
 
 
 
-    show_PCA_component_sliders(dataMatGPA, meanMat, 5, 100, -100);
+//    show_PCA_component_sliders(dataMatGPA, meanMat, 5, 100, -100);
 
 //    namedWindow("pcaShapeOp", WINDOW_AUTOSIZE);
 

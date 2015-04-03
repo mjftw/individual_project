@@ -122,35 +122,14 @@ int main()
     for(int i=0; i< GPAPoints.size(); i++)
         GPAPointsMat.push_back(Mat(GPAPoints));
 
+//    Mat GPAPointsMatPCA = formatImagesForPCA(GPAPointsMat);
+//    Mat projected =  pca.project(GPAPointsMatPCA.row(0));
+
     double meanScaleMetric = get_scale_metric(meanPointsMat);
     Point2f meanCentroid = get_vec_centroid(meanPoints);
     double meanOrientation = get_major_axis(meanPointsMat);
 
-    vector<Point2f> dataIn, dataOut;
 
-    for(int i=0; i<5; i++)
-        dataIn.push_back(Point2f(rand()%300, rand()%300));
-
-    PCA_backProject_pts(dataIn, dataOut, pca);
-
-
-    namedWindow("PCA_constrain", WINDOW_NORMAL);
-    Mat img(bg.size(), CV_8UC3, Scalar(0,0,0));
-    draw_body_pts(img, dataOut, Scalar(255,255,0));
-    imshow("PCA_constrain", img);
-
-    ///NOTE TO SELF:
-    ///Currently testing PCA constrain function
-
-    waitKey(0);
-
-    PCA_constrain_data(dataOut, pca);
-    draw_body_pts(img, dataOut, Scalar(0,255,255));
-    imshow("PCA_constrain", img);
-    waitKey(0);
-
-
-    waitKey(0);
 
     for(srcVid.read(frame); srcVid.read(frame);)
     {

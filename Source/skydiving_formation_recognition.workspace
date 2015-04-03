@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="FS_recognition">
-		<Project filename="active_shape_model/active_shape_model.cbp" />
 		<Project filename="skydiver_blobs/skydiver_blobs.cbp" />
+		<Project filename="active_shape_model/active_shape_model.cbp" />
 		<Project filename="extract_bg/extract_bg.cbp" />
+		<Project filename="fs_recognition/fs_recognition.cbp" />
 		<Project filename="collect_landmarks/collect_landmarks.cbp" />
 		<Project filename="make_templates/make_templates.cbp" />
-		<Project filename="../../../../../Users/Merlin/Desktop/test/test.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

@@ -108,7 +108,6 @@
 		</Compiler>
 		<Unit filename="../../external_libs/Procrustes/Procrustes.cpp" />
 		<Unit filename="../../external_libs/Procrustes/Procrustes.h" />
-		<Unit filename="../mw_libCV.h" />
 		<Unit filename="active_shape_model.cpp" />
 		<Extensions>
 			<code_completion />
