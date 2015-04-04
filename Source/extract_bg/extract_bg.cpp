@@ -16,7 +16,6 @@ using namespace cv;
 int main()
 {
     bool useStdDev = true;
-    bool cutHoles = false;
     int minStdDevs = 2;
     int medianFilerSize = 5;
     int medianFilerShape = MORPH_RECT;
@@ -30,9 +29,6 @@ int main()
 
     bg = imread(bg_img_path, CV_LOAD_IMAGE_GRAYSCALE);
 
-    namedWindow("background image", WINDOW_NORMAL);
-    imshow("background image", bg);
-
     Size srcSize = Size((int)(srcVid.get(CV_CAP_PROP_FRAME_WIDTH) * SCALE_FACTOR), (int)(srcVid.get(CV_CAP_PROP_FRAME_HEIGHT)) * SCALE_FACTOR);
 
     outVid_fg.open("D:/Libaries/Uni Work/Year 3/Part III Project/Data/out/4-way_fs_dive-pool_fg.avi", FCC, srcVid.get(CV_CAP_PROP_FPS), srcSize, 0);
@@ -45,13 +41,11 @@ int main()
 
     for(srcVid.read(frame); srcVid.read(frame);)
     {
-        get_skydiver_blobs(frame, bg, frame);
-
-        imshow("Frame", frame);
-        outVid_fg << temp;
+        cvtColor(frame, frame, CV_BGR2GRAY);
+        extract_fg(frame, bg, frame, 7, MORPH_RECT, true, true, 1);
+        outVid_fg << frame;
         waitKey(1);
     }
 
-    waitKey(0);
     return 0;
 }

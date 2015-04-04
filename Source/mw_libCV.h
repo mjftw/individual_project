@@ -286,7 +286,7 @@ inline void median_filter_binary(Mat& src, Mat& dst, int filter_size = 3, int fi
 {
     Mat kernel = getStructuringElement(filter_shape, Size(filter_size, filter_size));
     filter2D(src, dst, CV_8U, kernel);
-    threshold(dst, dst, 6, 255, THRESH_BINARY);
+    threshold(dst, dst, floor(float(filter_size*filter_size)/2.0), 255, THRESH_BINARY);
 }
 
 inline void plot_pts(Mat& img, vector<Point2f>& pts, Scalar colour)
@@ -349,14 +349,11 @@ inline Mat reformatImageFromPCA(Mat& img, int channels=1, int rows=11)
     return Mat(pts);
 }
 
-inline void PCA_backProject_pts(vector<Point2f> ptsP, vector<Point2f>& ptsOut, PCA& pca)
+inline void PCA_backProject_pts(vector<double> ptsP, vector<Point2f>& ptsOut, PCA& pca)
 {
-    float evals[pca.eigenvalues.rows];
-    for(int i=0; i<pca.eigenvalues.rows; i+=2)
-    {
-        evals[i] = ptsP[i].x;
-        evals[i+1] = ptsP[i].y;
-    }
+    double evals[pca.eigenvalues.rows];
+    for(int i=0; i<pca.eigenvalues.rows; i++)
+        evals[i] = ptsP[i];
 
     Mat P(1, pca.eigenvalues.rows, CV_32F, &evals);
     Mat bP = pca.backProject(P);
@@ -366,13 +363,32 @@ inline void PCA_backProject_pts(vector<Point2f> ptsP, vector<Point2f>& ptsOut, P
         ptsOut.push_back(Point2f(bP.at<float>(0,2*i), bP.at<float>(0,2*i+1)));
 }
 
-inline void PCA_project_pts(vector<Point2f> ptsIn, vector<Point2f>& ptsP, PCA& pca)
+inline void PCA_project_pts(vector<Point2f>& ptsIn, vector<double>& pOut, PCA& pca)
 {
+//    Mat ptsMat(ptsIn);
+//    vector<Mat> ptsMatVec;
+//    ptsMatVec.push_back(ptsMat);
+//
+//    Mat ptsMatPCA = formatImagesForPCA(ptsMatVec);
+
+    float ptsArr[ptsIn.size()];
+
+    for(int i=0; i<ptsIn.size(); i+=2)
+    {
+        ptsArr[i] = ptsIn[i].x;
+        ptsArr[i+1] = ptsIn[i].y;
+    }
+
+    Mat ptsMat(ptsIn);
+    ptsMat.reshape(1,1).copyTo(ptsMat);
+    Mat p = pca.project(ptsMat);
+
+    p.copyTo(pOut);
 
 }
 inline void PCA_save(const PCA& pca, string path)
 {
-    FileStorage fs(path, FileStorage::WRITE);
+    FileStorage  fs(path, FileStorage::WRITE);
     fs << "mean" << pca.mean;
     fs << "eigenvectors" << pca.eigenvectors;
     fs << "eigenvalues" << pca.eigenvalues;
@@ -430,7 +446,7 @@ inline void PCA_constrain_pts(vector<Point2f>& ptsIn, vector<Point2f>& ptsOut, P
     Mat dataP = pca.project(dataMat);
     PCA_constrain(dataP, pca);
     dataMat = pca.backProject(dataP);
-    //procrustes stuff here?
+    //procrusts stuff here?
 
     ptsOut.clear();
     for(int i=0; i<ptsIn.size(); i++)
@@ -526,7 +542,7 @@ inline Point2f template_match_point(Mat& src, Mat& templ, int search_range, vect
     return maxPt2f;
 }
 
-inline vector<vector<Point> > extract_fg(Mat& frame, Mat& bg, Mat& dst, int medianFilerSize=5, int medianFilerShape=MORPH_RECT, bool use_contours=true, bool use_sdt_dev=false, double min_std_devs=2)
+inline vector<vector<Point> > extract_fg(Mat& frame, Mat& bg, Mat& dst, int medianFilerSize=5, int medianFilerShape=MORPH_RECT, bool use_contours=true, bool use_sdt_dev=true, double min_std_devs=2)
 {
         dst = cv::abs(frame - bg);
         threshold(dst, dst, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU); //Adaptive thresholding

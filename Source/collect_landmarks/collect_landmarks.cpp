@@ -65,8 +65,10 @@ void call_back(int event, int x, int y, int flags, void* data_struct)
 int main()
 {
 
-    string src_vid_name = "4-way_fs_dive-pool";
-    VideoCapture srcVid(SRC_VID_DIR + src_vid_name + ".avi");
+    Mat bg = imread(BG_IMG_PATH);
+    cvtColor(bg, bg, CV_BGR2GRAY);
+
+    VideoCapture srcVid(SRC_VID_PATH);
     const int nFrames = srcVid.get(CV_CAP_PROP_FRAME_COUNT)/2;
 
     const int framesToUse = 5;
@@ -75,7 +77,7 @@ int main()
 
     vector<vector<Point2f> > landmarks;
     vector<Mat> frames;
-    Mat frame;
+    Mat frame, frameMask;
 
     setMouseCallback("Frame", call_back, &landmarks.back());
 
@@ -87,17 +89,20 @@ int main()
     for(int i=framesToUse; i<nFrames; i++)
     {
         srcVid.read(frame);
-
         if((i%((int)floor((nFrames/(framesToUse)) + 0.5))) == framesToUse) //select frames to use
         {
             cout << "Loading next frame" << endl;
 
+
             Mat frameAnnotated = frame.clone();
             Mat img = frame.clone();
+            cvtColor(frame, frameMask, CV_BGR2GRAY);
+            extract_fg(frameMask, bg, frameMask, 7, MORPH_RECT, true, true, 1);
 
             for(int j=0; j<4; j++)
             {
                 landmarks.resize(landmarks.size()+1);
+
                 imshow("Frame", img);
 
                 skipFrame = false;
@@ -130,8 +135,10 @@ int main()
             if(!skipFrame)
             {
                 stringstream ss("");
-                ss << (string)LANDMARKS_DIR + LANDMARKS_FRAMES_FILENAME << landmarks.size()/4 -1 << ".bmp";
-                imwrite(ss.str().c_str(), frame);
+                ss << (string)LANDMARKS_DIR + LANDMARKS_FRAMES_FILENAME << landmarks.size()/4 -1;
+                imwrite((ss.str() + ".bmp").c_str(), frame);
+
+                imwrite((ss.str() + "_bin.bmp").c_str(), frameMask);
             }
         }
     }

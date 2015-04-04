@@ -4,6 +4,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/video/background_segm.hpp>
 #include "../mw_libCV.h"
+#include <Procrustes.h>
 #include "skydiverblob.h"
 
 #define SRC_VID_DIR (std::string)"../../Data/src/vid/"
@@ -126,80 +127,110 @@ int main()
     Point2f meanCentroid = get_vec_centroid(meanPoints);
     double meanOrientation = get_major_axis(meanPointsMat);
 
-    vector<Point2f> dataIn, dataOut;
 
-    for(int i=0; i<5; i++)
-        dataIn.push_back(Point2f(rand()%300, rand()%300));
-
-    PCA_backProject_pts(dataIn, dataOut, pca);
-
-
-    namedWindow("PCA_constrain", WINDOW_NORMAL);
+    namedWindow("PCA", WINDOW_NORMAL);
     Mat img(bg.size(), CV_8UC3, Scalar(0,0,0));
-    draw_body_pts(img, dataOut, Scalar(255,255,0));
-    imshow("PCA_constrain", img);
+
+    for(int j=0; j< 1000; j++) //Testing project -> add some random values -> backproject
+    {
+        vector<Point2f> dataIn, dataOut;
+        vector<double> P;
+        draw_body_pts(img, GPAPoints[0], Scalar(255,255,0));
+
+        PCA_project_pts(GPAPoints[0], P, pca);
+        cout << "P: " << Mat(P) << endl;
+        for(int i=0; i<P.size(); i++)
+        {
+            P[i] += float(rand()%200 -100)/100.0;
+            cout << P[i] << ", ";
+        }
+            cout << endl;
+
+        PCA_backProject_pts(P, dataOut, pca);
+
+        Mat dataMat(dataOut);
+
+        cout << dataOut << endl;
+
+
+        ///Why is is complaining about this?
+        ///Exact same usage in active_shape_mode and no complaints there!
+        Procrustes proc;
+        proc.procrustes(meanPoints, dataOut);
+
+        draw_body_pts(img, dataOut, Scalar(0,255,255));
+        imshow("PCA", img);
+        waitKey(0);
+    }
+
+
+//    vector<double> fakeP = {-0.815214, -0.671381, -0.262617, 0.594221, 0.0790387};
+//    vector<Point2f> dataOut;
+//
+//    PCA_backProject_pts(fakeP, dataOut, pca);
+//
+//    draw_body_pts(img, dataOut, Scalar(0,255,255));
+//    imshow("PCA", img);
+//    waitKey(0);
 
     ///NOTE TO SELF:
     ///Currently testing PCA constrain function
 
-    waitKey(0);
-
-    PCA_constrain_pts(dataIn, dataOut, pca);
-    draw_body_pts(img, dataOut, Scalar(0,255,255));
-    imshow("PCA_constrain", img);
-    waitKey(0);
+//    PCA_constrain_pts(dataIn, dataOut, pca);
+//    draw_body_pts(img, dataOut, Scalar(0,255,255));
+//    imshow("PCA_constrain", img);
+//    waitKey(0);
 
 
-    waitKey(0);
 
-    for(srcVid.read(frame); srcVid.read(frame);)
-    {
-        do
-        {
-            if(!srcVid.read(frame))
-                continue;
-            cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
-            extract_fg(frame, bg, fgMask, 7, MORPH_ELLIPSE, true, true);
-        }while(!find_4_skydiver_blobs(fgMask, skydiverBlobs, skydiverBlobContours));
-
-        SkydiverBlob skydivers[4];
-
-        for(int i=0; i<4; i++)
-            skydivers[i].approx_parameters(skydiverBlobContours[i], skydiverBlobs.rows, skydiverBlobs.cols);
-
-
-        vector<vector<Point2f> > initialModelFit(4);
-        Mat skydiverBlobsParams(skydiverBlobs.size(), skydiverBlobs.type(), Scalar(0,0,0));
-
-        for(int i=0; i<4; i++) //For each skydiver blob
-        {
-            double initialScale = skydivers[i].scaleMetric/meanScaleMetric;
-            Point2f initialTranslation = skydivers[i].centroid - meanCentroid;
-            double initialRotation = skydivers[i].orientation - meanOrientation;
-
-            Mat initialModelFitMat = meanPointsMat.clone();
-            initialModelFitMat += Scalar(initialTranslation.x, initialTranslation.y);
-
-            initialModelFitMat.reshape(2).copyTo(initialModelFit[i]);
-
-            initialModelFit[i] = rotate_pts(initialModelFit[i], initialRotation, initialScale);
-
-            //Output
-            Mat params = skydivers[i].paramaters_image().clone();
-            Scalar colour(128);
-            draw_body_pts(params, initialModelFit[i], colour);
-//            if(skydivers[i].flag)
-                skydiverBlobsParams += params;
-//            draw_angle(skydiverBlobs, skydivers[i].centroid, skydivers[i].orientation);
-
-    //        stringstream numSS("");
-    //        numSS << i;
-    //        imwrite("blob_params_" + numSS.str() + ".jpg", params);
-
-        }
-        imshow("Window", skydiverBlobsParams);
-        waitKey(100);
-    }
+//    for(srcVid.read(frame); srcVid.read(frame);)
+//    {
+//        do
+//        {
+//            if(!srcVid.read(frame))
+//                continue;
+//            cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
+//            extract_fg(frame, bg, fgMask, 7, MORPH_ELLIPSE, true, true);
+//        }while(!find_4_skydiver_blobs(fgMask, skydiverBlobs, skydiverBlobContours));
+//
+//        SkydiverBlob skydivers[4];
+//
+//        for(int i=0; i<4; i++)
+//            skydivers[i].approx_parameters(skydiverBlobContours[i], skydiverBlobs.rows, skydiverBlobs.cols);
+//
+//
+//        vector<vector<Point2f> > initialModelFit(4);
+//        Mat skydiverBlobsParams(skydiverBlobs.size(), skydiverBlobs.type(), Scalar(0,0,0));
+//
+//        for(int i=0; i<4; i++) //For each skydiver blob
+//        {
+//            double initialScale = skydivers[i].scaleMetric/meanScaleMetric;
+//            Point2f initialTranslation = skydivers[i].centroid - meanCentroid;
+//            double initialRotation = skydivers[i].orientation - meanOrientation;
+//
+//            Mat initialModelFitMat = meanPointsMat.clone();
+//            initialModelFitMat += Scalar(initialTranslation.x, initialTranslation.y);
+//
+//            initialModelFitMat.reshape(2).copyTo(initialModelFit[i]);
+//
+//            initialModelFit[i] = rotate_pts(initialModelFit[i], initialRotation, initialScale);
+//
+//            //Output
+//            Mat params = skydivers[i].paramaters_image().clone();
+//            Scalar colour(128);
+//            draw_body_pts(params, initialModelFit[i], colour);
+////            if(skydivers[i].flag)
+//                skydiverBlobsParams += params;
+////            draw_angle(skydiverBlobs, skydivers[i].centroid, skydivers[i].orientation);
+//
+//    //        stringstream numSS("");
+//    //        numSS << i;
+//    //        imwrite("blob_params_" + numSS.str() + ".jpg", params);
+//
+//        }
+//        imshow("Window", skydiverBlobsParams);
+//        waitKey(100);
+//    }
 
    return 0;
 }
