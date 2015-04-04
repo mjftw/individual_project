@@ -148,6 +148,7 @@ int main()
     ///Next step:
     ///Test template matching function
 
+    Procrustes proc;
 
 //    PCA_constrain_pts(dataIn, dataOut, pca);
 //    draw_body_pts(img, dataOut, Scalar(0,255,255));
