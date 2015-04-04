@@ -27,7 +27,7 @@ void make_templates(vector<vector<Mat> >& imgs, vector<vector<Mat> >& imgs_mask)
     cout << "Building templates..." << endl;
     for(int i=0; i<11; i++)
     {
-        imgs[0][i] &= imgs_mask[0][i];
+//        imgs[0][i] &= imgs_mask[0][i];
         templates[i] = imgs[0][i].clone();
 
         for(int j=1; j<imgs.size(); j++)
@@ -37,11 +37,10 @@ void make_templates(vector<vector<Mat> >& imgs, vector<vector<Mat> >& imgs_mask)
             imwrite(TEMPLATES_PATH + ss.str(), imgs[j][i]);
             subimgNames.push_back(ss.str());
 
-            imgs[j][i] &= imgs_mask[j][i];
-            //Cumulative moving average prevents template getting too bright
+//            imgs[j][i] &= imgs_mask[j][i];
+            //Cumulative moving average prevents template saturating over multiple additions
             templates[i] += (imgs[j][i] - templates[i])/(i+1);
         }
-
 
         stringstream ss;
         ss << (string)TEMPLATES_NAME << "_" << get_point_name(i) << "_" << ".bmp";
@@ -91,7 +90,7 @@ void get_skydiver_subimgs(vector<vector<Mat> >& subimgs, vector<Mat>& landmarksF
 int main()
 {
     int roiSize = 40;
-    bool useColour = false;
+    bool useColour = true;
 
     vector<vector<Mat> > subimgs, subimgsMask;
     vector<Mat> templates;
@@ -138,5 +137,6 @@ int main()
     }
 
     make_templates(subimgs, subimgsMask);
+    return 0;
 }
 

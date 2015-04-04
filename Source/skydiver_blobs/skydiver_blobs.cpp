@@ -4,7 +4,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/video/background_segm.hpp>
 #include "../mw_libCV.h"
-#include <Procrustes.h>
+#include "../../external_libs/Procrustes/Procrustes.h"
 #include "skydiverblob.h"
 
 #define SRC_VID_DIR (std::string)"../../Data/src/vid/"
@@ -131,50 +131,23 @@ int main()
     namedWindow("PCA", WINDOW_NORMAL);
     Mat img(bg.size(), CV_8UC3, Scalar(0,0,0));
 
-    for(int j=0; j< 1000; j++) //Testing project -> add some random values -> backproject
-    {
-        vector<Point2f> dataIn, dataOut;
-        vector<double> P;
-        draw_body_pts(img, GPAPoints[0], Scalar(255,255,0));
-
-        PCA_project_pts(GPAPoints[0], P, pca);
-        cout << "P: " << Mat(P) << endl;
-        for(int i=0; i<P.size(); i++)
-        {
-            P[i] += float(rand()%200 -100)/100.0;
-            cout << P[i] << ", ";
-        }
-            cout << endl;
-
-        PCA_backProject_pts(P, dataOut, pca);
-
-        Mat dataMat(dataOut);
-
-        cout << dataOut << endl;
 
 
-        ///Why is is complaining about this?
-        ///Exact same usage in active_shape_mode and no complaints there!
-        Procrustes proc;
-        proc.procrustes(meanPoints, dataOut);
+    vector<double> fakeP = {-3.815214, -0.671381, -0.262617, 0.594221, 0.0790387};
+    vector<Point2f> dataOut;
 
-        draw_body_pts(img, dataOut, Scalar(0,255,255));
-        imshow("PCA", img);
-        waitKey(0);
-    }
+    Mat fakePMat(fakeP);
+    PCA_constrain(fakePMat, pca, PCA_BOX, 3);
 
+    PCA_backProject_pts(fakeP, dataOut, pca);
 
-//    vector<double> fakeP = {-0.815214, -0.671381, -0.262617, 0.594221, 0.0790387};
-//    vector<Point2f> dataOut;
-//
-//    PCA_backProject_pts(fakeP, dataOut, pca);
-//
-//    draw_body_pts(img, dataOut, Scalar(0,255,255));
-//    imshow("PCA", img);
-//    waitKey(0);
+    draw_body_pts(img, dataOut, Scalar(0,255,255));
+    imshow("PCA", img);
+    waitKey(0);
 
-    ///NOTE TO SELF:
-    ///Currently testing PCA constrain function
+    ///Next step:
+    ///Test template matching function
+
 
 //    PCA_constrain_pts(dataIn, dataOut, pca);
 //    draw_body_pts(img, dataOut, Scalar(0,255,255));

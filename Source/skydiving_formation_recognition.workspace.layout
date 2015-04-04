@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_layout_file>
 	<FileVersion major="1" minor="0" />
-	<ActiveProject path="extract_bg/extract_bg.cbp" />
-	<PreferredTarget name="Debug" />
-	<EditorTabsLayout layout="0a2360d8551f2eb10000158b00000002=*1;extract_bg:extract_bg.cpp,0;skydiver_blobs:..\mw_libCV.h,2;make_templates:make_templates.cpp@layout2|name=dummy;caption=;state=2098174;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=841;besth=380;minw=841;minh=380;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=0a2360d8551f2eb10000158b00000002;caption=;state=2098172;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=200;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=202|" />
+	<ActiveProject path="skydiver_blobs/skydiver_blobs.cbp" />
+	<EditorTabsLayout layout="0a292930551fc90e0000419400000002=*2;make_templates:make_templates.cpp,0;skydiver_blobs:skydiver_blobs.cpp|0a292aa8551fc90e0000419d00000003=+1;skydiver_blobs:..\mw_libCV.h@layout2|name=dummy;caption=;state=2098174;dir=3;layer=0;row=0;pos=0;prop=100000;bestw=180;besth=180;minw=180;minh=180;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=0a292930551fc90e0000419400000002;caption=;state=2098172;dir=5;layer=0;row=0;pos=0;prop=100000;bestw=200;besth=200;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|name=0a292aa8551fc90e0000419d00000003;caption=;state=2098172;dir=2;layer=1;row=0;pos=0;prop=100000;bestw=841;besth=380;minw=-1;minh=-1;maxw=-1;maxh=-1;floatx=-1;floaty=-1;floatw=-1;floath=-1|dock_size(5,0,0)=202|dock_size(2,1,0)=700|" />
 </CodeBlocks_workspace_layout_file>

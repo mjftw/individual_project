@@ -17,7 +17,7 @@ public:
     cv::Mat translation;    /* Translation involved to obtain Yprime */
     cv::Mat rotation;       /* Rotation involved to obtain Yprime */
     cv::Mat Yprime;         /* The transformed point from Y to X */
-    float scale;            /* Scaling invovled to obtain Yprime */
+    float scale;            /* Scaling involved to obtain Yprime */
     float error;            /* Squared error of final result */
     bool scaling;
     bool bestReflection;
