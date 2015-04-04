@@ -20,21 +20,23 @@ int main()
     int medianFilerSize = 5;
     int medianFilerShape = MORPH_RECT;
 
-    string bg_img_path = "D:/Libaries/Uni Work/Year 3/Part III Project/Data/src/img/tunnel-background.png";
-
-    VideoCapture srcVid("D:/Libaries/Uni Work/Year 3/Part III Project/Data/src/vid/4-way_fs_dive-pool.avi"), dstVid;
+     VideoCapture srcVid(SRC_VID_PATH), dstVid;
+    if(!srcVid.isOpened())
+        cout << "Could not open input video for writing: " << SRC_VID_PATH << endl;
     VideoWriter outVid_fg;
 
     Mat frame, temp, bg;
 
-    bg = imread(bg_img_path, CV_LOAD_IMAGE_GRAYSCALE);
+    bg = imread(BG_IMG_PATH, CV_LOAD_IMAGE_GRAYSCALE);
+    if(bg.data == NULL)
+        cout << "Could not open background image: " << BG_IMG_PATH << endl;
 
     Size srcSize = Size((int)(srcVid.get(CV_CAP_PROP_FRAME_WIDTH) * SCALE_FACTOR), (int)(srcVid.get(CV_CAP_PROP_FRAME_HEIGHT)) * SCALE_FACTOR);
 
-    outVid_fg.open("D:/Libaries/Uni Work/Year 3/Part III Project/Data/out/4-way_fs_dive-pool_fg.avi", FCC, srcVid.get(CV_CAP_PROP_FPS), srcSize, 0);
+    outVid_fg.open("../../Data/src/vid/4-way_fs_dive-pool_fg.avi", FCC, srcVid.get(CV_CAP_PROP_FPS), srcSize, 0);
 
     if(!outVid_fg.isOpened())
-        cout << endl << "Could not open output video for writing" << endl;
+        cout << "Could not open output video for writing" << endl;
 
 
     namedWindow("Frame", WINDOW_NORMAL);
@@ -43,6 +45,7 @@ int main()
     {
         cvtColor(frame, frame, CV_BGR2GRAY);
         extract_fg(frame, bg, frame, 7, MORPH_RECT, true, true, 1);
+        imshow("Frame", frame);
         outVid_fg << frame;
         waitKey(1);
     }
