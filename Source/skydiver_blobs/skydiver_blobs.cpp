@@ -86,72 +86,151 @@ vector<Point2f> rotate_pts(vector<Point2f>& pts, double angle, double scale=1, b
 
 int main()
 {
+
+    //--------------LOAD DATA--------------
     VideoCapture srcVid(SRC_VID_PATH);
     if(!srcVid.isOpened())
     {
-        cout << "Cannot open video file " << SRC_VID_PATH << endl;
+        cerr << "ERROR: Cannot open video file " << SRC_VID_PATH << endl;
         exit(EXIT_FAILURE);
     }
+    else
+        cout << "Source video loaded" << endl;
+
+    Mat bg = imread(BG_IMG_PATH, CV_LOAD_IMAGE_GRAYSCALE);
+    if(bg.data == NULL)
+    {
+        cerr << "ERROR: Cannot open background image " << BG_IMG_PATH << endl;
+        exit(EXIT_FAILURE);
+    }
+    else
+        cout << "Background image loaded" << endl;
+
+    vector<Mat> templates;
+    {
+    bool templatesLoaded = true;
+    for(int i=0; i<11; i++)
+    {
+        stringstream ss("");
+        ss << TEMPLATES_PATH << TEMPLATES_NAME << "_" << get_point_name(i) << "_" << ".bmp";
+        Mat templ = imread(ss.str(), CV_LOAD_IMAGE_GRAYSCALE);
+        if(templ.data == NULL)
+        {
+            cerr << "ERROR: Cannot open template " << ss.str() << endl;
+            templatesLoaded = false;
+        }
+        templates.push_back(templ);
+    }
+    if(!templatesLoaded)
+        exit(EXIT_FAILURE);
+    else
+        cout << "Template images loaded" << endl;
+    }
+
+    vector<vector<Point2f> > meanPointsVec;
+    if(!load_data_pts(PROCRUSTES_MEAN_DATA_PATH, meanPointsVec))
+    {
+        cerr << "ERROR: Cannot open mean data points file " << PROCRUSTES_MEAN_DATA_PATH << endl;
+        exit(EXIT_FAILURE);
+    }
+    else
+        cout << "Procrustes mean data loaded" << endl;
+    vector<Point2f> meanPoints = meanPointsVec[0];
+    Mat meanPointsMat(meanPoints);
 
     PCA pca;
-    PCA_load(pca, PCA_FILENAME);
+    if(!PCA_load(pca, PCA_DATA_PATH))
+        cerr << "ERROR: Cannot open PCA model data file " << PCA_DATA_PATH << endl;
+    else
+        cout << "PCA model data loaded" << endl;
 
-    Mat frame, fgMask;
-    Mat bg = imread(BG_IMG_PATH, CV_LOAD_IMAGE_GRAYSCALE);
+
+    //--------------JUST FOR TESTING--------------
+
+    namedWindow("Test");
+    Mat testImg(bg.size(), bg.type(), Scalar(0,0,0));
+
+    //--------------INITIALISATION--------------
+
+    double meanScaleMetric = get_scale_metric(meanPointsMat);
+    Point2f meanCentroid = get_vec_centroid(meanPoints);
+    double meanOrientation = get_major_axis(meanPointsMat);
+
     Mat skydiverBlobs;
-
+    Mat frame, fgMask;
     vector<vector<Point> > skydiverBlobContours;
+    do
+    {
+        if(!srcVid.read(frame))
+        {
+            cerr << "ERROR: Initialisation failed, could not find skydivers" << endl;
+            exit(EXIT_FAILURE);
+        }
+        cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
+        extract_fg(frame, bg, fgMask, 7, MORPH_ELLIPSE, true, true);
+    }while(!find_4_skydiver_blobs(fgMask, skydiverBlobs, skydiverBlobContours));
+
+    SkydiverBlob skydivers[4];
+
+    for(int i=0; i<4; i++)
+        skydivers[i].approx_parameters(skydiverBlobContours[i], skydiverBlobs.rows, skydiverBlobs.cols);
+
+    vector<vector<Point2f> > initialModel(4);
+    Mat skydiverBlobsParams(skydiverBlobs.size(), skydiverBlobs.type(), Scalar(0,0,0));
+
+    for(int i=0; i<4; i++) //Fit procrustes mean to skydiver blobs
+    {
+        double initialScale = skydivers[i].scaleMetric/meanScaleMetric;
+        Point2f initialTranslation = skydivers[i].centroid - meanCentroid;
+        double initialRotation = skydivers[i].orientation - meanOrientation;
+
+        Mat initialModelFitMat = meanPointsMat.clone();
+        initialModelFitMat += Scalar(initialTranslation.x, initialTranslation.y);
+
+        initialModelFitMat.reshape(2).copyTo(initialModel[i]);
+
+        initialModel[i] = rotate_pts(initialModel[i], initialRotation, initialScale);
+
+        PCA_constrain_pts(initialModel[i], initialModel[i], pca);
+
+    }
+    imshow("Test", testImg);
+    waitKey(0);
+
+
+
+
+
 
 //    Mat contourImg;
 //    overlay_contours(skydiverBlobs, contourImg, skydiverBlobContours);
 //    imshow("Window", skydiverBlobs);
 //    waitKey(0);
 
-    vector<vector<Point2f> > meanPointsVec;
-    if(!load_data_pts("data_points_mean.txt", meanPointsVec))
-        cout << "Could not open mean data points file." << endl;
-
-    vector<Point2f> meanPoints = meanPointsVec[0];
-
-    Mat meanPointsMat(meanPoints);
-
-    vector<vector<Point2f> > GPAPoints;
-    if(!load_data_pts("data_points_mean.txt", GPAPoints))
-        cout << "Could not open mean data points file." << endl;
-
-    vector<Mat> GPAPointsMat;
-    for(int i=0; i< GPAPoints.size(); i++)
-        GPAPointsMat.push_back(Mat(GPAPoints));
-
-    double meanScaleMetric = get_scale_metric(meanPointsMat);
-    Point2f meanCentroid = get_vec_centroid(meanPoints);
-    double meanOrientation = get_major_axis(meanPointsMat);
 
 
-    namedWindow("PCA", WINDOW_NORMAL);
-    Mat img(bg.size(), CV_8UC3, Scalar(0,0,0));
+//    namedWindow("PCA", WINDOW_NORMAL);
+//    Mat img(bg.size(), CV_8UC3, Scalar(0,0,0));
 
-
-
-    vector<double> fakeP = {-3.815214, -0.671381, -0.262617, 0.594221, 0.0790387};
-    vector<Point2f> dataOut;
-
-    Mat fakePMat(fakeP);
-    PCA_constrain(fakePMat, pca, PCA_BOX, 3);
-
-    PCA_backProject_pts(fakeP, dataOut, pca);
-
-    draw_body_pts(img, dataOut, Scalar(0,255,255));
-    imshow("PCA", img);
-    waitKey(0);
+//    vector<double> fakeP = {-3.815214, -0.671381, -0.262617, 0.594221, 0.0790387};
+//    vector<Point2f> dataOut;
+//
+//    Mat fakePMat(fakeP);
+//    PCA_constrain(fakePMat, pca, PCA_BOX, 3);
+//
+//    PCA_backProject_pts(fakeP, dataOut, pca);
+//
+//    draw_body_pts(img, dataOut, Scalar(0,255,255));
+//    imshow("PCA", img);
+//    waitKey(0);
 
     ///Next step:
     ///Test template matching function
 
-    Procrustes proc;
+//    Procrustes proc;
 
 //    PCA_constrain_pts(dataIn, dataOut, pca);
-//    draw_body_pts(img, dataOut, Scalar(0,255,255));
+//    draw_body_pts(img, dataon lOut, Scalar(0,255,255));
 //    imshow("PCA_constrain", img);
 //    waitKey(0);
 
@@ -173,7 +252,7 @@ int main()
 //            skydivers[i].approx_parameters(skydiverBlobContours[i], skydiverBlobs.rows, skydiverBlobs.cols);
 //
 //
-//        vector<vector<Point2f> > initialModelFit(4);
+//        vector<vector<Point2f> > initialModel(4);
 //        Mat skydiverBlobsParams(skydiverBlobs.size(), skydiverBlobs.type(), Scalar(0,0,0));
 //
 //        for(int i=0; i<4; i++) //For each skydiver blob
@@ -185,16 +264,33 @@ int main()
 //            Mat initialModelFitMat = meanPointsMat.clone();
 //            initialModelFitMat += Scalar(initialTranslation.x, initialTranslation.y);
 //
-//            initialModelFitMat.reshape(2).copyTo(initialModelFit[i]);
+//            initialModelFitMat.reshape(2).copyTo(initialModel[i]);
 //
-//            initialModelFit[i] = rotate_pts(initialModelFit[i], initialRotation, initialScale);
+//            initialModel[i] = rotate_pts(initialModel[i], initialRotation, initialScale);
+//
 //
 //            //Output
 //            Mat params = skydivers[i].paramaters_image().clone();
-//            Scalar colour(128);
-//            draw_body_pts(params, initialModelFit[i], colour);
-////            if(skydivers[i].flag)
-//                skydiverBlobsParams += params;
+//            draw_body_pts(params, initialModel[i], Scalar(128));
+//
+//            skydiverBlobsParams += params;
+//
+//            vector<Point2f> nextPts;
+//            //template matching
+//            for(int j=0; j<11; j++)
+//            {
+//                double matchAmount = 0;
+//                nextPts.push_back(template_match_point(frame, templates[j], 30, initialModel[i], j, CV_TM_SQDIFF, &matchAmount));
+//                cout << "match amount: " << matchAmount << endl;
+//            }
+//            cout << "curr pts: " << Mat(initialModel[i]) <<  endl;
+//            cout << "next pts: " << Mat(nextPts) <<  endl;
+//
+//
+//            draw_body_pts(params, nextPts, Scalar(200));
+//            imshow("Window", skydiverBlobsParams);
+//
+//
 ////            draw_angle(skydiverBlobs, skydivers[i].centroid, skydivers[i].orientation);
 //
 //    //        stringstream numSS("");

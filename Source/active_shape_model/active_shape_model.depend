@@ -173,7 +173,7 @@
 	<set>
 	<valarray>
 
-1428051061 d:\libaries\uni work\year 3\part iii project\source\mw_libcv.h
+1428195070 d:\libaries\uni work\year 3\part iii project\source\mw_libcv.h
 	<fstream>
 	<iostream>
 	<opencv2/core/core.hpp>
@@ -183,18 +183,18 @@
 	"Procrustes.h"
 	<random>
 
-1428048817 d:\libaries\uni work\year 3\part iii project\external_libs\procrustes\procrustes.h
+1428118772 d:\libaries\uni work\year 3\part iii project\external_libs\procrustes\procrustes.h
 	<iostream>
 	<opencv2/opencv.hpp>
 
-1428049136 source:d:\libaries\uni work\year 3\part iii project\source\active_shape_model\active_shape_model.cpp
+1428197507 source:d:\libaries\uni work\year 3\part iii project\source\active_shape_model\active_shape_model.cpp
 	<iostream>
 	<fstream>
 	<stdlib.h>
 	<opencv2/core/core.hpp>
 	<opencv2/highgui/highgui.hpp>
 	<opencv2/imgproc/imgproc.hpp>
-	<Procrustes.h>
+	"../../external_libs/Procrustes/Procrustes.h"
 	"../mw_libCV.h"
 
 1428041497 d:\libaries\uni work\year 3\part iii project\external_libs\opencv\include\opencv2\opencv.hpp

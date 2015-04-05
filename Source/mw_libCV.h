@@ -16,16 +16,21 @@
 using namespace std;
 using namespace cv;
 
+#define OUTPUT_DATA_DIR "../../Data/"
+
 #define LANDMARKS_FILENAME "landmarks.txt"
 #define LANDMARKS_DIR "../data/landmarks/"
 #define LANDMARKS_FRAMES_FILENAME "landmarks_frame_"
-
-#define PCA_FILENAME "../data/PCA.xml"
 
 #define TEMPLATES_PATH "../data/templates/"
 #define TEMPLATES_IMG_LIST "imglist"
 #define TEMPLATES_NAME "template"
 #define SUBIMG_NAME "subimg"
+
+#define PROCRUSTES_MEAN_DATA_PATH "../data/active_shape_model/procrustes_mean_data.txt"
+#define PROCRUSTES_DATA_PATH  "../data/active_shape_model/procrustes_data.txt"
+
+#define PCA_DATA_PATH "../data/active_shape_model/PCA_data.xml"
 
 #define SRC_VID_PATH "../../Data/src/vid/4-way_fs_dive-pool.avi"
 #define BG_IMG_PATH "../../Data/src/img/tunnel-background.png"
@@ -524,16 +529,63 @@ inline Mat get_subimg(Mat& src, Point2f& center_pt, Point2f& ref_pt, int box_siz
 
 inline Point2f template_match_point(Mat& src, Mat& templ, int search_range, vector<Point2f> pts, int center_pt_name, int method = CV_TM_CCORR, double* matchScore=0)
 {
+    namedWindow("temp_match");
+    namedWindow("template");
+    namedWindow("src");
     Point2f bestMatchPt;
+
+    ///l and r points seem to be swapped for each of these. why?
+    switch(center_pt_name)
+    {
+        case L_HAND:
+            center_pt_name = R_HAND;
+        break;
+        case L_ELBOW:
+            center_pt_name = R_ELBOW;
+        break;
+        case L_KNEE:
+            center_pt_name = R_KNEE;
+        break;
+        case L_FOOT:
+            center_pt_name = R_FOOT;
+        break;
+        case R_HAND:
+            center_pt_name = L_HAND;
+        break;
+        case R_ELBOW:
+            center_pt_name = L_ELBOW;
+        break;
+        case R_KNEE:
+            center_pt_name = L_KNEE;
+        break;
+        case R_FOOT:
+            center_pt_name = L_FOOT;
+        break;
+    }
+
+
     Point2f center = pts[center_pt_name];
     Point2f refPt = pts[ref_pt(center_pt_name)];
 
     Mat searchArea = get_subimg(src, center, refPt, templ.rows + 2*search_range);
+
+    cout << get_point_name(center_pt_name) << endl;
+    imshow("src", src);
+    waitKey(0);
+    imshow("template", templ);
+    waitKey(0);
+    imshow("temp_match", searchArea);
+    waitKey(0);
+
+
     Mat searchResult;
     matchTemplate(searchArea, templ, searchResult, method);
 
+    imshow("temp_match", searchResult);
+    waitKey(0);
+
     Point maxPt;
-    minMaxLoc(searchResult, 0, matchScore, 0, &maxPt);
+    minMaxLoc(searchResult, matchScore, 0, 0, &maxPt);
 
     //move point back to original space
     Point2f maxPt2f = Point2f_to_Point(maxPt);

@@ -4,7 +4,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <Procrustes.h>
+#include "../../external_libs/Procrustes/Procrustes.h"
 #include "../mw_libCV.h"
 
 using namespace std;
@@ -24,35 +24,46 @@ void upscale_data(Mat& data)
 
 typedef struct
 {
-    int* components;
+    vector<double>* components;
+    PCA* pca;
     int n_constraints;
 }ButtonData;
 
 void PCA_constrain_arr(ButtonData* btnData)
 {
-    int maxStdDevs = 10;
+    Mat componentsMat(*btnData->components);
+    PCA_constrain(componentsMat, *btnData->pca, PCA_BOX, 3);
+    componentsMat.copyTo(*btnData->components);
 
-    cout << btnData->components[0] << endl;
     for(int i=0; i<btnData->n_constraints; i++)
-    {   //box constraint
-        if(btnData->components[i]-100 > maxStdDevs)
-        {
-            btnData->components[i] = maxStdDevs + 100;
-
-            stringstream ss("");
-            ss << i;
-            setTrackbarPos(string("C") + ss.str().c_str(), "PCA component sliders", maxStdDevs+100);
-        }
-        else if(btnData->components[i]-100 < -maxStdDevs)
-        {
-             btnData->components[i] = -maxStdDevs + 100;
-
-            stringstream ss("");
-            ss << i;
-            setTrackbarPos(string("C") + ss.str().c_str(), "PCA component sliders", 100-maxStdDevs);
-        }
-
+    {
+        stringstream ss("");
+        ss << i;
+        setTrackbarPos(string("C") + ss.str().c_str(), "PCA component sliders", int(btnData->components->at(i) * 1000));
     }
+
+
+
+    int maxStdDevs = 10;
+    cout << "constrain" << endl;
+
+//    for(int i=0; i<btnData->n_constraints; i++)
+//    {   //box constraint
+//        if(btnData->components[i]-100 > maxStdDevs)
+//        {
+//            btnData->components[i] = maxStdDevs + 100;
+//
+//            stringstream ss("");
+//            ss << i;
+//        }
+//        else if(btnData->components[i]-100 < -maxStdDevs)
+//        {
+//             btnData->components[i] = -maxStdDevs + 100;
+//
+//            setTrackbarPos(string("C") + ss.str().c_str(), "PCA component sliders", 100-maxStdDevs);
+//        }
+//
+//    }
 }
 
 void click_button(int event, int x, int y, int flags, void* Data)
@@ -79,22 +90,27 @@ void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_comp
     vector<Mat> meanMat_{GPA_mean};
     Mat meanMatPCA = formatImagesForPCA(meanMat_);
 
+    vector<Point2f> pts;
+
     namedWindow("PCA component sliders", WINDOW_AUTOSIZE);
     PCA pca(dataMatPCA, meanMatPCA, CV_PCA_DATA_AS_ROW, n_components);
 
     int initialVal = ((component_max - component_min) / 2);
     int maxVal = component_max - component_min;
     int component[n_components];
+    vector<double> components(n_components);
+    vector<int> componentsx1k(n_components);
 
     for(int i=0; i<n_components; i++)
     {
-        component[i] = initialVal;
+        componentsx1k[i] = initialVal;
         stringstream ss;
         ss << i;
-        createTrackbar(string("C") + ss.str().c_str(), "PCA component sliders", &component[i], maxVal);
+        createTrackbar(string("C") + ss.str().c_str(), "PCA component sliders", &componentsx1k[i], maxVal*1000);
     }
         ButtonData btnData;
-        btnData.components = &component[0];
+        btnData.components = &components;
+        btnData.pca = &pca;
         btnData.n_constraints = n_components;
         setMouseCallback("PCA component sliders", click_button, (void*)&btnData);
 
@@ -106,22 +122,23 @@ void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_comp
     {
         Mat pcaShapeOp(window_size, CV_8UC3, Scalar(255, 255, 255));
 
+        for(int i=0; i<n_components; i++)
+            components[i] = float(componentsx1k[i])/1000.0;
+
         float descriptors[n_components];
         for(int i=0; i<n_components; i++)
-            descriptors[i] = component[i] + component_min;
+            descriptors[i] = components[i] + component_min;
 
-        Mat pcaShape = pca.backProject(Mat(1, n_components, CV_32F, &descriptors));
 
-        vector<Point2f> pcaShapeVec;
-        reformatImageFromPCA(pcaShape).copyTo(pcaShapeVec);
+        PCA_backProject_pts(components, pts, pca);
 
         Scalar colour(0, 0, 0);
-        draw_body_pts(pcaShapeOp, pcaShapeVec, colour);
+        draw_body_pts(pcaShapeOp, pts, colour);
 
         stringstream ss;
         for(int i=0; i< n_components; i++)
         {
-            ss << "C" << i << "=" << (int)descriptors[i];
+            ss << "C" << i << "=" << descriptors[i];
             if(i+1 < n_components)
                 ss << ", ";
         }
@@ -153,7 +170,7 @@ void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_comp
 int main()
 {
     vector<vector<Point2f> > data;
-    load_data_pts("data_points.txt", data);
+    load_data_pts(string(LANDMARKS_DIR) + LANDMARKS_FILENAME , data);
     vector<Mat> dataMat;
     vector<Scalar> colours;
 
@@ -173,7 +190,7 @@ int main()
     upscale_data(meanMat);
     meanMat.reshape(2).copyTo(meanMatVec[0]);
 
-    write_data_pts("data_points_mean.txt", meanMatVec);
+    write_data_pts(PROCRUSTES_MEAN_DATA_PATH, meanMatVec);
 
     for(int i=0; i<dataMatGPA.size(); i++)
     {
@@ -181,8 +198,7 @@ int main()
         dataMatGPA[i].reshape(2).copyTo(data[i]);
     }
 
-
-    write_data_pts("data_points_PA.txt", data);
+    write_data_pts(PROCRUSTES_DATA_PATH, data);
 
     Mat meanOp(1000, 1000, CV_8UC3, Scalar(255, 255, 255));
 
@@ -206,9 +222,9 @@ int main()
     namedWindow("GPA shapes", WINDOW_AUTOSIZE);
     imshow("GPA shapes", GPAOp);
 
-    imwrite("data_points.jpg", dataOp);
-    imwrite("mean_shape.jpg", meanOp);
-    imwrite("GPA_shapes.jpg", GPAOp);
+    imwrite(string(OUTPUT_DATA_DIR) + "data_points.jpg", dataOp);
+    imwrite(string(OUTPUT_DATA_DIR) + "mean_shape.jpg", meanOp);
+    imwrite(string(OUTPUT_DATA_DIR) + "GPA_shapes.jpg", GPAOp);
 
 
 //PCA
@@ -220,7 +236,7 @@ int main()
 //    int nComponents = 5;
     double retainedVariance = 0.9;
     PCA pca(dataMatPCA, meanMatPCA, CV_PCA_DATA_AS_ROW, retainedVariance);
-    PCA_save(pca, PCA_FILENAME);
+    PCA_save(pca, PCA_DATA_PATH);
 
 
     namedWindow("constrain pts");
@@ -234,7 +250,7 @@ int main()
 
 
 
-    show_PCA_component_sliders(dataMatGPA, meanMat, 5, 100, -100);
+    show_PCA_component_sliders(dataMatGPA, meanMat, 5, 1, -1);
 
 //    namedWindow("pcaShapeOp", WINDOW_AUTOSIZE);
 

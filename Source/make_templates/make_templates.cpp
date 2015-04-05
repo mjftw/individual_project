@@ -33,7 +33,7 @@ void make_templates(vector<vector<Mat> >& imgs, vector<vector<Mat> >& imgs_mask)
         for(int j=1; j<imgs.size(); j++)
         {
             stringstream ss;
-            ss << (string)SUBIMG_NAME << "_" << get_point_name(i) << "_" << j << ".bmp";
+            ss << SUBIMG_NAME << "_" << get_point_name(i) << "_" << j << ".bmp";
             imwrite(TEMPLATES_PATH + ss.str(), imgs[j][i]);
             subimgNames.push_back(ss.str());
 
@@ -43,7 +43,7 @@ void make_templates(vector<vector<Mat> >& imgs, vector<vector<Mat> >& imgs_mask)
         }
 
         stringstream ss;
-        ss << (string)TEMPLATES_NAME << "_" << get_point_name(i) << "_" << ".bmp";
+        ss << TEMPLATES_NAME << "_" << get_point_name(i) << "_" << ".bmp";
         templateNames.push_back(ss.str());
         imwrite (TEMPLATES_PATH + ss.str(), templates[i]);
     }
