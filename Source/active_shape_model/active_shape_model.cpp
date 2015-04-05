@@ -24,46 +24,28 @@ void upscale_data(Mat& data)
 
 typedef struct
 {
-    vector<double>* components;
+    vector<int>* components;
     PCA* pca;
     int n_constraints;
+    int sliderMin;
+    float nStdDev;
 }ButtonData;
 
 void PCA_constrain_arr(ButtonData* btnData)
 {
-    Mat componentsMat(*btnData->components);
-    PCA_constrain(componentsMat, *btnData->pca, PCA_BOX, 3);
-    componentsMat.copyTo(*btnData->components);
-
+    vector<float> components(btnData->n_constraints);
     for(int i=0; i<btnData->n_constraints; i++)
     {
+        components[i] = float(btnData->components->at(i) + btnData->sliderMin);
+        Mat compMat(components);
+
+        PCA_constrain(compMat, *btnData->pca, PCA_BOX, btnData->nStdDev);
+        btnData->components->at(i) = floor(components[i] + 0.5) - btnData->sliderMin;
+
         stringstream ss("");
         ss << i;
-        setTrackbarPos(string("C") + ss.str().c_str(), "PCA component sliders", int(btnData->components->at(i) * 1000));
+        setTrackbarPos(string("C") + ss.str().c_str(), "PCA component sliders", btnData->components->at(i));
     }
-
-
-
-    int maxStdDevs = 10;
-    cout << "constrain" << endl;
-
-//    for(int i=0; i<btnData->n_constraints; i++)
-//    {   //box constraint
-//        if(btnData->components[i]-100 > maxStdDevs)
-//        {
-//            btnData->components[i] = maxStdDevs + 100;
-//
-//            stringstream ss("");
-//            ss << i;
-//        }
-//        else if(btnData->components[i]-100 < -maxStdDevs)
-//        {
-//             btnData->components[i] = -maxStdDevs + 100;
-//
-//            setTrackbarPos(string("C") + ss.str().c_str(), "PCA component sliders", 100-maxStdDevs);
-//        }
-//
-//    }
 }
 
 void click_button(int event, int x, int y, int flags, void* Data)
@@ -90,28 +72,30 @@ void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_comp
     vector<Mat> meanMat_{GPA_mean};
     Mat meanMatPCA = formatImagesForPCA(meanMat_);
 
-    vector<Point2f> pts;
-
     namedWindow("PCA component sliders", WINDOW_AUTOSIZE);
     PCA pca(dataMatPCA, meanMatPCA, CV_PCA_DATA_AS_ROW, n_components);
 
     int initialVal = ((component_max - component_min) / 2);
     int maxVal = component_max - component_min;
-    int component[n_components];
-    vector<double> components(n_components);
-    vector<int> componentsx1k(n_components);
+    vector<int> component(n_components);
+
+    float nStdDevs = 3;
+    int nStdDevsx1k = nStdDevs*1000;
+    createTrackbar("stdDevs", "PCA component sliders", &nStdDevsx1k, 5000);
 
     for(int i=0; i<n_components; i++)
     {
-        componentsx1k[i] = initialVal;
+        component[i] = initialVal;
         stringstream ss;
         ss << i;
-        createTrackbar(string("C") + ss.str().c_str(), "PCA component sliders", &componentsx1k[i], maxVal*1000);
+        createTrackbar(string("C") + ss.str().c_str(), "PCA component sliders", &component[i], maxVal);
     }
+
         ButtonData btnData;
-        btnData.components = &components;
-        btnData.pca = &pca;
+        btnData.components = &component;
         btnData.n_constraints = n_components;
+        btnData.pca = &pca;
+        btnData.sliderMin = component_min;
         setMouseCallback("PCA component sliders", click_button, (void*)&btnData);
 
         BUT_PT1 = Point(window_size.width - 155, 35);
@@ -122,26 +106,25 @@ void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_comp
     {
         Mat pcaShapeOp(window_size, CV_8UC3, Scalar(255, 255, 255));
 
-        for(int i=0; i<n_components; i++)
-            components[i] = float(componentsx1k[i])/1000.0;
+        btnData.nStdDev = nStdDevs;
+        nStdDevs = float(nStdDevsx1k)/1000.0;
 
         float descriptors[n_components];
         for(int i=0; i<n_components; i++)
-            descriptors[i] = components[i] + component_min;
+            descriptors[i] = component[i] + component_min;
 
+        Mat pcaShape = pca.backProject(Mat(1, n_components, CV_32F, &descriptors));
 
-        PCA_backProject_pts(components, pts, pca);
+        vector<Point2f> pcaShapeVec;
+        reformatImageFromPCA(pcaShape).copyTo(pcaShapeVec);
 
         Scalar colour(0, 0, 0);
-        draw_body_pts(pcaShapeOp, pts, colour);
+        draw_body_pts(pcaShapeOp, pcaShapeVec, colour);
 
         stringstream ss;
         for(int i=0; i< n_components; i++)
-        {
-            ss << "C" << i << "=" << descriptors[i];
-            if(i+1 < n_components)
-                ss << ", ";
-        }
+            ss << "C" << i << "=" << (int)descriptors[i] << ", ";
+        ss << "n std devs=" << nStdDevs;
 
         putText(pcaShapeOp, ss.str().c_str(), Point(5, 30), FONT_HERSHEY_SIMPLEX, 0.8, Scalar(128, 128, 128));
 
@@ -250,7 +233,7 @@ int main()
 
 
 
-    show_PCA_component_sliders(dataMatGPA, meanMat, 5, 1, -1);
+    show_PCA_component_sliders(dataMatGPA, meanMat, 5, 100, -100);
 
 //    namedWindow("pcaShapeOp", WINDOW_AUTOSIZE);
 
@@ -272,6 +255,7 @@ int main()
     waitKey(0);
     return 0;
 }
+
 
 
 
