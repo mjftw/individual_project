@@ -48,6 +48,12 @@ void PCA_constrain_arr(ButtonData* btnData)
     }
 }
 
+void update_sliders(int, void* Data)
+{
+    ButtonData* data = static_cast<ButtonData*>(Data);
+    PCA_constrain_arr(data);
+}
+
 void click_button(int event, int x, int y, int flags, void* Data)
 {
     ButtonData* data = static_cast<ButtonData*>(Data);
@@ -81,7 +87,6 @@ void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_comp
 
     float nStdDevs = 3;
     int nStdDevsx1k = nStdDevs*1000;
-    createTrackbar("stdDevs", "PCA component sliders", &nStdDevsx1k, 5000);
 
     for(int i=0; i<n_components; i++)
     {
@@ -97,6 +102,8 @@ void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_comp
         btnData.pca = &pca;
         btnData.sliderMin = component_min;
         setMouseCallback("PCA component sliders", click_button, (void*)&btnData);
+        createTrackbar("stdDevs", "PCA component sliders", &nStdDevsx1k, 5000, update_sliders, (void*)&btnData);
+
 
         BUT_PT1 = Point(window_size.width - 155, 35);
         BUT_PT2 = Point(window_size.width - 25, 35);
