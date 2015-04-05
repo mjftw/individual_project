@@ -10,12 +10,6 @@
 using namespace std;
 using namespace cv;
 
-bool CLICKED = false;
-Point BUT_PT1;
-Point BUT_PT2;
-Point BUT_PT3;
-Point BUT_PT4;
-
 void upscale_data(Mat& data)
 {
     data *= 500;
@@ -54,24 +48,6 @@ void update_sliders(int, void* Data)
     PCA_constrain_arr(data);
 }
 
-void click_button(int event, int x, int y, int flags, void* Data)
-{
-    ButtonData* data = static_cast<ButtonData*>(Data);
-
-    if(event == EVENT_LBUTTONDOWN)
-    {
-        if((x>=BUT_PT1.x) && (x<=BUT_PT2.x) && (y>=BUT_PT3.y) && (y<=BUT_PT2.y))
-        {
-            CLICKED = true;
-            PCA_constrain_arr(data);
-        }
-
-    }
-    else if(event == EVENT_LBUTTONUP)
-        CLICKED = false;
-
-}
-
 void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_components, int component_max, int component_min, Size window_size = Size(1000,1000))
 {
     Mat dataMatPCA = formatImagesForPCA(GPA_data);
@@ -88,29 +64,24 @@ void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_comp
     float nStdDevs = 3;
     int nStdDevsx1k = nStdDevs*1000;
 
+    ButtonData btnData;
+    btnData.components = &component;
+    btnData.n_constraints = n_components;
+    btnData.pca = &pca;
+    btnData.sliderMin = component_min;
+    createTrackbar("stdDevs", "PCA component sliders", &nStdDevsx1k, 5000, update_sliders, (void*)&btnData);
+
     for(int i=0; i<n_components; i++)
     {
         component[i] = initialVal;
         stringstream ss;
         ss << i;
-        createTrackbar(string("C") + ss.str().c_str(), "PCA component sliders", &component[i], maxVal);
+        createTrackbar(string("C") + ss.str().c_str(), "PCA component sliders", &component[i], maxVal, update_sliders, (void*)&btnData);
     }
 
-        ButtonData btnData;
-        btnData.components = &component;
-        btnData.n_constraints = n_components;
-        btnData.pca = &pca;
-        btnData.sliderMin = component_min;
-        setMouseCallback("PCA component sliders", click_button, (void*)&btnData);
-        createTrackbar("stdDevs", "PCA component sliders", &nStdDevsx1k, 5000, update_sliders, (void*)&btnData);
-
-
-        BUT_PT1 = Point(window_size.width - 155, 35);
-        BUT_PT2 = Point(window_size.width - 25, 35);
-        BUT_PT3 = Point(window_size.width - 25, 10);
-        BUT_PT4 = Point(window_size.width - 155, 10);
     while(1)
     {
+        PCA_constrain_arr(&btnData);
         Mat pcaShapeOp(window_size, CV_8UC3, Scalar(255, 255, 255));
 
         btnData.nStdDev = nStdDevs;
@@ -134,23 +105,6 @@ void show_PCA_component_sliders(vector<Mat>& GPA_data, Mat& GPA_mean, int n_comp
         ss << "n std devs=" << nStdDevs;
 
         putText(pcaShapeOp, ss.str().c_str(), Point(5, 30), FONT_HERSHEY_SIMPLEX, 0.8, Scalar(128, 128, 128));
-
-        if(CLICKED)
-        {
-            putText(pcaShapeOp, "Constrain", Point(pcaShapeOp.cols - 149,31 ), FONT_HERSHEY_SIMPLEX, 0.8, Scalar(128, 128, 128));
-            line(pcaShapeOp, Point(BUT_PT1.x+1, BUT_PT1.y+1), Point(BUT_PT2.x+1, BUT_PT2.y+1), Scalar(128, 128, 128), 1);
-            line(pcaShapeOp, Point(BUT_PT2.x+1, BUT_PT2.y+1), Point(BUT_PT3.x+1, BUT_PT3.y+1), Scalar(128, 128, 128), 1);
-            line(pcaShapeOp, Point(BUT_PT3.x+1, BUT_PT3.y+1), Point(BUT_PT4.x+1, BUT_PT4.y+1), Scalar(128, 128, 128), 1);
-            line(pcaShapeOp, Point(BUT_PT4.x+1, BUT_PT4.y+1), Point(BUT_PT1.x+1, BUT_PT1.y+1), Scalar(128, 128, 128), 1);
-        }
-        else
-        {
-            putText(pcaShapeOp, "Constrain", Point(pcaShapeOp.cols - 150,30 ), FONT_HERSHEY_SIMPLEX, 0.8, Scalar(128, 128, 128));
-            line(pcaShapeOp, BUT_PT1, BUT_PT2, Scalar(128, 128, 128), 2);
-            line(pcaShapeOp, BUT_PT2, BUT_PT3, Scalar(128, 128, 128), 2);
-            line(pcaShapeOp, BUT_PT3, BUT_PT4, Scalar(128, 128, 128), 1);
-            line(pcaShapeOp, BUT_PT4, BUT_PT1, Scalar(128, 128, 128), 1);
-        }
 
         imshow("PCA component sliders", pcaShapeOp);
         waitKey(1);
