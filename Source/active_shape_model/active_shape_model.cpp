@@ -159,59 +159,29 @@ int main()
         dataMatGPA[i].reshape(2).copyTo(gpaDataVec[i]);
         plot_pts(GPAOp, gpaDataVec[i], colours[i]);
     }
-    namedWindow("data points", WINDOW_AUTOSIZE);
-    imshow("data points", dataOp);
-    namedWindow("mean shape", WINDOW_AUTOSIZE);
-    imshow("mean shape", meanOp);
-    namedWindow("GPA shapes", WINDOW_AUTOSIZE);
-    imshow("GPA shapes", GPAOp);
+//    namedWindow("data points", WINDOW_AUTOSIZE);
+//    imshow("data points", dataOp);
+//    namedWindow("mean shape", WINDOW_AUTOSIZE);
+//    imshow("mean shape", meanOp);
+//    namedWindow("GPA shapes", WINDOW_AUTOSIZE);
+//    imshow("GPA shapes", GPAOp);
 
     imwrite(string(OUTPUT_DATA_DIR) + "data_points.jpg", dataOp);
     imwrite(string(OUTPUT_DATA_DIR) + "mean_shape.jpg", meanOp);
     imwrite(string(OUTPUT_DATA_DIR) + "GPA_shapes.jpg", GPAOp);
 
 
-//PCA
+    //PCA
     Mat dataMatPCA = formatImagesForPCA(dataMatGPA);
     vector<Mat> meanMat_{meanMat};
     Mat meanMatPCA = formatImagesForPCA(meanMat_);
 
 
-//    int nComponents = 5;
-    double retainedVariance = 0.9;
+    double retainedVariance = 0.90;
     PCA pca(dataMatPCA, meanMatPCA, CV_PCA_DATA_AS_ROW, retainedVariance);
     PCA_save(pca, PCA_DATA_PATH);
 
-
-    namedWindow("constrain pts");
-//
-//
-//    vector<Mat> testData;
-//    testData.push_back(data);
-//    testDataPCA = formatImagesForPCA(testData);
-//
-//    Mat testDataP = pca.project(testDataPCA);
-
-
-
     show_PCA_component_sliders(dataMatGPA, meanMat, 5, 100, -100);
-
-//    namedWindow("pcaShapeOp", WINDOW_AUTOSIZE);
-
-//    vector<vector<Point2f> > gpaDataVecPCA(gpaDataVec.size());
-//    vector<Mat> gpaDataMatPCA;
-//    Mat gpaDataPCAop(1000, 1000, CV_8UC3, Scalar(255, 255, 255));
-//    for(int i=0; i<gpaDataVec.size(); i++)
-//    {
-//        Mat temp = pca.project(dataMatPCA.row(i));
-//        cout << "nComponents = " << temp.cols << endl;
-//        temp = pca.backProject(temp);
-//        reformatImageFromPCA(temp).copyTo(gpaDataVecPCA[i]);
-//        plot_pts(gpaDataPCAop, gpaDataVecPCA[i], colours[i]);
-//    }
-//
-//    namedWindow("GPA shapes PCA", WINDOW_AUTOSIZE);
-//    imshow("GPA shapes PCA", gpaDataPCAop);
 
     waitKey(0);
     return 0;

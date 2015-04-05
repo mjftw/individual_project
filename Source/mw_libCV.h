@@ -11,6 +11,7 @@
 #include <iostream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "../external_libs/Procrustes/Procrustes.h"
 
 
 using namespace std;
@@ -377,14 +378,6 @@ inline void PCA_project_pts(vector<Point2f>& ptsIn, vector<double>& pOut, PCA& p
 //
 //    Mat ptsMatPCA = formatImagesForPCA(ptsMatVec);
 
-    float ptsArr[ptsIn.size()];
-
-    for(int i=0; i<ptsIn.size(); i+=2)
-    {
-        ptsArr[i] = ptsIn[i].x;
-        ptsArr[i+1] = ptsIn[i].y;
-    }
-
     Mat ptsMat(ptsIn);
     ptsMat.reshape(1,1).copyTo(ptsMat);
     Mat p = pca.project(ptsMat);
@@ -401,13 +394,17 @@ inline void PCA_save(const PCA& pca, string path)
     fs.release();
 }
 
-inline void PCA_load(PCA& pca, string path)
+inline bool PCA_load(PCA& pca, string path)
 {
     FileStorage fs(path, FileStorage::READ);
+    if(!fs.isOpened())
+        return false;
     fs["mean"] >> pca.mean;
     fs["eigenvectors"] >> pca.eigenvectors;
     fs["eigenvalues"] >> pca.eigenvalues;
     fs.release();
+
+    return true;
 }
 
 
@@ -525,6 +522,28 @@ inline Mat get_subimg(Mat& src, Point2f& center_pt, Point2f& ref_pt, int box_siz
 //        line(src, rectVerts[i], rectVerts[(i+1)%4], Scalar(255,255,255));
 
     return cropped;
+}
+
+inline vector<Point2f> rotate_pts(vector<Point2f>& pts, double angle, double scale=1, bool use_radians=false)
+{
+    if(!use_radians)
+        angle *= (3.141592654/180);
+
+    vector<Point2f> dst;
+    Point2f mean = get_vec_centroid(pts);
+
+    for(int i=0; i<pts.size(); i++)
+    {
+        Point2f pt = pts[i] - mean;
+        Point2f tmp;
+        pt *= scale;
+        tmp.x = pt.x*cos(angle) - pt.y*sin(angle);
+        tmp.y = pt.x*sin(angle) + pt.y*cos(angle);
+        tmp += mean;
+        dst.push_back(tmp);
+    }
+
+    return dst;
 }
 
 inline Point2f template_match_point(Mat& src, Mat& templ, int search_range, vector<Point2f> pts, int center_pt_name, int method = CV_TM_CCORR, double* matchScore=0)
@@ -647,5 +666,11 @@ inline vector<vector<Point> > extract_fg(Mat& frame, Mat& bg, Mat& dst, int medi
             }
         }
         return contours;
+}
+
+void PA(vector<Point2f>& pts1, vector<Point2f>& pts2)
+{
+    Procrustes proc;
+    proc.procrustes(pts1, pts2);
 }
 #endif //MW_LIBCV_H

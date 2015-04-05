@@ -40,8 +40,6 @@ bool find_4_skydiver_blobs(Mat& binary_src, Mat& dst, vector<vector<Point> >& sk
 
     sort(connectedComponents.begin(), connectedComponents.end(), contourSort);
 
-    //*TODO* Need to make this work if less than 4 blobs.
-    //This will be the case if the skydivers are too close & their blobs overlap
     for(int i=0;i<((connectedComponents.size() < 4)? connectedComponents.size():4) ; i++)
         skydiver_blob_contours.push_back(connectedComponents[i]);
 
@@ -62,30 +60,43 @@ void rotate_mat(Mat& src, Mat& dst, double angle, double scale=1)
     warpAffine(src, dst, rotMatrix, src.size());
 }
 
-vector<Point2f> rotate_pts(vector<Point2f>& pts, double angle, double scale=1, bool use_radians=false)
+double iterate_model(vector<Point2f>& pts, vector<Point2f>& pts_next, Mat& frame, vector<Mat>& templates, int templ_search_range, PCA& pca, double& nStdDevs, double& change_limit)
 {
-    if(!use_radians)
-        angle *= (3.141592654/180);
+    /**
+    Code to get next iteration:
+    template match to get new points
+    project
+    constrain
+    back project
+    translate, rotate, scale after back projection
+    ...
+    */
+    pts_next.clear();
+    for(int i=0; i<11; i++)
+        pts_next.push_back(template_match_point(frame, templates[i], templ_search_range, pts, i));
 
-    vector<Point2f> dst;
-    Point2f mean = get_vec_centroid(pts);
+    PCA_constrain_pts(pts_next, pts_next, pca, PCA_BOX, nStdDevs);
+    PA(pts, pts_next);
 
-    for(int i=0; i<pts.size(); i++)
-    {
-        Point2f pt = pts[i] - mean;
-        Point2f tmp;
-        pt *= scale;
-        tmp.x = pt.x*cos(angle) - pt.y*sin(angle);
-        tmp.y = pt.x*sin(angle) + pt.y*cos(angle);
-        tmp += mean;
-        dst.push_back(tmp);
+    double maxChange;
+    for(int i=0; i<11; i++)
+    {   //Euclidean distance between point and previous iteration
+        double change = sqrt(((pts[i].x - pts_next[i].x) * (pts[i].x - pts_next[i].x)) + ((pts[i].y - pts_next[i].y) * (pts[i].y - pts_next[i].y)));
+        if(change > maxChange)
+            maxChange = change;
     }
 
-    return dst;
+    if(maxChange > change_limit)
+        maxChange = iterate_model(pts_next, pts_next, frame, templates, templ_search_range, pca, nStdDevs, change_limit);
+
+    return maxChange;
 }
 
 int main()
 {
+    int templateSearchRange = 30;
+    double nStdDevs = 2;
+    double iterationChangeLimit = 5;
 
     //--------------LOAD DATA--------------
     VideoCapture srcVid(SRC_VID_PATH);
@@ -191,8 +202,9 @@ int main()
 
         initialModel[i] = rotate_pts(initialModel[i], initialRotation, initialScale);
 
-        PCA_constrain_pts(initialModel[i], initialModel[i], pca);
 
+        ///*TODO: test iterate_model function
+        iterate_model(initialModel[i], initialModel[i], frame, templates, templateSearchRange, pca, nStdDevs, iterationChangeLimit);
     }
     imshow("Test", testImg);
     waitKey(0);
