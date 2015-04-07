@@ -449,7 +449,6 @@ inline void PCA_constrain_pts(vector<Point2f>& ptsIn, vector<Point2f>& ptsOut, P
     Mat dataP = pca.project(dataMat);
     PCA_constrain(dataP, pca);
     dataMat = pca.backProject(dataP);
-    //procrusts stuff here?
 
     ptsOut.clear();
     for(int i=0; i<ptsIn.size(); i++)
@@ -507,11 +506,6 @@ inline Mat get_subimg(Mat& src, Point2f& center_pt, Point2f& ref_pt, int box_siz
     Point2f rectVerts[4];
     rotRect.points(rectVerts);
 
-    vector<Point2f> rectVertsVec;
-    for(int i=0; i<4; i++)
-        rectVertsVec.push_back(rectVerts[i]);
-    bounding = src(boundingRect(rectVertsVec));
-
     rotMat = getRotationMatrix2D(rotRect.center, theta, 1.0);
     warpAffine(src, rotated, rotMat, src.size(), INTER_CUBIC);
 
@@ -546,70 +540,58 @@ inline vector<Point2f> rotate_pts(vector<Point2f>& pts, double angle, double sca
     return dst;
 }
 
-inline Point2f template_match_point(Mat& src, Mat& templ, int search_range, vector<Point2f> pts, int center_pt_name, int method = CV_TM_CCORR, double* matchScore=0)
+inline Point2f template_match_point(Mat& src, Mat& templ, int search_range, vector<Point2f>& pts, int center_pt_name, int method = TM_CCORR_NORMED, double* matchScore=0)
 {
-    namedWindow("temp_match");
-    namedWindow("template");
-    namedWindow("src");
     Point2f bestMatchPt;
-
-    ///l and r points seem to be swapped for each of these. why?
-    switch(center_pt_name)
-    {
-        case L_HAND:
-            center_pt_name = R_HAND;
-        break;
-        case L_ELBOW:
-            center_pt_name = R_ELBOW;
-        break;
-        case L_KNEE:
-            center_pt_name = R_KNEE;
-        break;
-        case L_FOOT:
-            center_pt_name = R_FOOT;
-        break;
-        case R_HAND:
-            center_pt_name = L_HAND;
-        break;
-        case R_ELBOW:
-            center_pt_name = L_ELBOW;
-        break;
-        case R_KNEE:
-            center_pt_name = L_KNEE;
-        break;
-        case R_FOOT:
-            center_pt_name = L_FOOT;
-        break;
-    }
-
 
     Point2f center = pts[center_pt_name];
     Point2f refPt = pts[ref_pt(center_pt_name)];
 
     Mat searchArea = get_subimg(src, center, refPt, templ.rows + 2*search_range);
 
-    cout << get_point_name(center_pt_name) << endl;
-    imshow("src", src);
-    waitKey(0);
-    imshow("template", templ);
-    waitKey(0);
-    imshow("temp_match", searchArea);
-    waitKey(0);
-
-
     Mat searchResult;
     matchTemplate(searchArea, templ, searchResult, method);
+    normalize(searchResult, searchResult, 0, 1, NORM_MINMAX, -1, Mat());
 
-    imshow("temp_match", searchResult);
-    waitKey(0);
+    Mat srcCpy = src.clone();
 
     Point maxPt;
     minMaxLoc(searchResult, matchScore, 0, 0, &maxPt);
+    Point2f maxPt2f = Point2f_to_Point(maxPt);
+
+
+    circle(searchResult, maxPt, 5, Scalar(0));
+    circle(searchArea, maxPt2f + Point2f(searchArea.rows/2-searchResult.rows/2, searchArea.cols/2-searchResult.cols/2) , 7, 150, 1);
+
 
     //move point back to original space
-    Point2f maxPt2f = Point2f_to_Point(maxPt);
-    maxPt2f = rotate_pt(maxPt2f, center, 0-get_angle(center, refPt));
+
+    maxPt2f += Point2f(searchArea.rows/2 - searchResult.rows/2, searchArea.cols/2 - searchResult.cols/2);
+    maxPt2f -= Point2f(searchArea.rows/2, searchArea.cols/2);
+
     maxPt2f += center;
+    Point2f origin(0,0);
+    maxPt2f = rotate_pt(maxPt2f, center , to_rads(get_angle(center, refPt))/*-get_angle(center, refPt)*/);
+
+    circle(srcCpy, maxPt2f, 7, 150, 1);
+    draw_body_pts(srcCpy, pts, Scalar(200));
+
+    namedWindow("template");
+    imshow("template", templ);
+
+    namedWindow("search area");
+    imshow("search area", searchArea);
+
+    namedWindow("srcCpy");
+    imshow("srcCpy", srcCpy);
+
+    namedWindow("match");
+    imshow("match", searchResult);
+
+
+    waitKey(0);
+
+
 
     return maxPt2f;
 }
@@ -668,9 +650,4 @@ inline vector<vector<Point> > extract_fg(Mat& frame, Mat& bg, Mat& dst, int medi
         return contours;
 }
 
-void PA(vector<Point2f>& pts1, vector<Point2f>& pts2)
-{
-    Procrustes proc;
-    proc.procrustes(pts1, pts2);
-}
 #endif //MW_LIBCV_H

@@ -71,12 +71,19 @@ double iterate_model(vector<Point2f>& pts, vector<Point2f>& pts_next, Mat& frame
     translate, rotate, scale after back projection
     ...
     */
-    pts_next.clear();
+
+    cout << Mat(pts) << endl;
+    waitKey(0);
+    pts_next.resize(11);
+    cout << Mat(pts_next) << endl;
+
     for(int i=0; i<11; i++)
-        pts_next.push_back(template_match_point(frame, templates[i], templ_search_range, pts, i));
+        pts_next[i] = template_match_point(frame, templates[i], templ_search_range, pts, i);
 
     PCA_constrain_pts(pts_next, pts_next, pca, PCA_BOX, nStdDevs);
-    PA(pts, pts_next);
+
+    Procrustes proc;
+    proc.procrustes(pts, pts_next);
 
     double maxChange;
     for(int i=0; i<11; i++)
@@ -155,6 +162,7 @@ int main()
     else
         cout << "PCA model data loaded" << endl;
 
+    cout << endl;
 
     //--------------JUST FOR TESTING--------------
 
@@ -177,7 +185,7 @@ int main()
             cerr << "ERROR: Initialisation failed, could not find skydivers" << endl;
             exit(EXIT_FAILURE);
         }
-        cvtColor(frame, frame, CV_BGR2GRAY); //make frame grayscale
+        cvtColor(frame, frame, CV_BGR2GRAY); //make frame greyscale
         extract_fg(frame, bg, fgMask, 7, MORPH_ELLIPSE, true, true);
     }while(!find_4_skydiver_blobs(fgMask, skydiverBlobs, skydiverBlobContours));
 
@@ -186,8 +194,10 @@ int main()
     for(int i=0; i<4; i++)
         skydivers[i].approx_parameters(skydiverBlobContours[i], skydiverBlobs.rows, skydiverBlobs.cols);
 
-    vector<vector<Point2f> > initialModel(4);
+    vector<Mat> templatesDyn; //Dynamic templates
+    vector<vector<Point2f> > initialModel(4), model(4);
     Mat skydiverBlobsParams(skydiverBlobs.size(), skydiverBlobs.type(), Scalar(0,0,0));
+
 
     for(int i=0; i<4; i++) //Fit procrustes mean to skydiver blobs
     {
@@ -204,8 +214,70 @@ int main()
 
 
         ///*TODO: test iterate_model function
-        iterate_model(initialModel[i], initialModel[i], frame, templates, templateSearchRange, pca, nStdDevs, iterationChangeLimit);
+//        iterate_model(initialModel[i], initialModel[i], frame, templates, templateSearchRange, pca, nStdDevs, iterationChangeLimit);
+
+        ///*TODO add functionality to use original template rather than dynamic one, if the match on the dynamic template was not good enough
+//        for(int j=0; j<11; j++)
+//            templatesDyn.push_back(get_subimg(frame, initialModel[i][j], initialModel[i][ref_pt(j)], templates[i].rows).clone());
     }
+
+    model = initialModel;
+    templatesDyn = templates;
+
+    while(1)
+    {
+        vector<Point2f> templateMatched(11);
+        for(int i=0; i<11; i++)
+           templateMatched[i] = template_match_point(frame, templatesDyn[i], 30, model[0], i);
+        vector<Point2f> constrained, rotated;
+        PCA_constrain_pts(templateMatched, constrained, pca);
+
+        Procrustes proc;
+        proc.procrustes(templateMatched, constrained);
+        model[0] = rotate_pts(constrained, -acos(proc.rotation.at<float>(0,0)), proc.scale, true);
+
+        Point2f translation = get_vec_centroid(templateMatched) - get_vec_centroid(constrained);
+        for(int i=0; i<11; i++)
+            model[0][i] += translation;
+
+        for(int i=0; i<11; i++)
+            templatesDyn[i] = get_subimg(frame, model[0][i], model[0][ref_pt(i)], templatesDyn[i].rows*0.85).clone();
+
+        Mat frameCpy = frame.clone();
+        Mat test(bg.size(), bg.type(), Scalar(0));
+        draw_body_pts(frameCpy, templateMatched, Scalar(128));
+        draw_body_pts(frameCpy, initialModel[0], Scalar(200));
+        draw_body_pts(frameCpy, model[0], Scalar(256));
+        imshow("Test", frameCpy);
+    }
+
+
+
+
+
+
+    //--------------Tracking--------------
+
+//    for(srcVid.read(frame); srcVid.read(frame);)
+//    {
+//        for(int i=0; i<4; i++)
+//        {
+//            iterate_model(initialModel[i], model[i], frame, templates, templateSearchRange, pca, nStdDevs, iterationChangeLimit);
+//            for(int j=0; j<11; j++)
+//                templatesDyn[i] = get_subimg(frame, initialModel[i][j], initialModel[i][ref_pt(j)], templatesDyn[i].rows);
+//        }
+//
+//        /*
+//        ...
+//        Check to see if formation has been made
+//        ...
+//        */
+//
+//
+//    }
+
+
+
     imshow("Test", testImg);
     waitKey(0);
 

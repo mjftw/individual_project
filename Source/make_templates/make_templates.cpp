@@ -89,7 +89,7 @@ void get_skydiver_subimgs(vector<vector<Mat> >& subimgs, vector<Mat>& landmarksF
 
 int main()
 {
-    int roiSize = 40;
+    int roiSize = 60;
     bool useColour = true;
 
     vector<vector<Mat> > subimgs, subimgsMask;

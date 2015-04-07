@@ -92,6 +92,8 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="../../external_libs/Procrustes/Procrustes.cpp" />
+		<Unit filename="../../external_libs/Procrustes/Procrustes.h" />
 		<Unit filename="../mw_libCV.h" />
 		<Unit filename="skydiver_blobs.cpp" />
 		<Unit filename="skydiverblob.cpp" />
