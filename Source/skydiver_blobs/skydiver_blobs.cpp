@@ -224,32 +224,34 @@ int main()
     model = initialModel;
     templatesDyn = templates;
 
+    Mat frameCpy = frame.clone();
+
+    int blobNo = 2;
     while(1)
     {
         vector<Point2f> templateMatched(11);
         for(int i=0; i<11; i++)
-           templateMatched[i] = template_match_point(frame, templatesDyn[i], 30, model[0], i);
-        vector<Point2f> constrained, rotated;
-        PCA_constrain_pts(templateMatched, constrained, pca);
+           templateMatched[i] = template_match_point(frame, templatesDyn[i], 25, model[blobNo], i);
+        vector<Point2f> constrained;
+        PCA_constrain_pts(templateMatched, constrained, pca, PCA_BOX, 4);
 
         Procrustes proc;
         proc.procrustes(templateMatched, constrained);
-        model[0] = rotate_pts(constrained, -acos(proc.rotation.at<float>(0,0)), proc.scale, true);
+        model[blobNo] = rotate_pts(constrained, -acos(proc.rotation.at<float>(0,0)), proc.scale, true);
 
         Point2f translation = get_vec_centroid(templateMatched) - get_vec_centroid(constrained);
         for(int i=0; i<11; i++)
-            model[0][i] += translation;
+            model[blobNo][i] += translation;
 
         for(int i=0; i<11; i++)
-            templatesDyn[i] = get_subimg(frame, model[0][i], model[0][ref_pt(i)], templatesDyn[i].rows*0.85).clone();
+            templatesDyn[i] = get_subimg(frame, model[blobNo][i], model[blobNo][ref_pt(i)], templatesDyn[i].rows*0.85).clone();
 
-        Mat frameCpy = frame.clone();
-        Mat test(bg.size(), bg.type(), Scalar(0));
         draw_body_pts(frameCpy, templateMatched, Scalar(128));
-        draw_body_pts(frameCpy, initialModel[0], Scalar(200));
-        draw_body_pts(frameCpy, model[0], Scalar(256));
+        draw_body_pts(frameCpy, initialModel[blobNo], Scalar(200));
+        draw_body_pts(frameCpy, model[blobNo], Scalar(256));
         imshow("Test", frameCpy);
-    }
+//        srcVid.read(frame);
+    };
 
 
 
