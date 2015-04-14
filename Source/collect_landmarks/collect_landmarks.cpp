@@ -71,7 +71,7 @@ int main()
     VideoCapture srcVid(SRC_VID_PATH);
     const int nFrames = srcVid.get(CV_CAP_PROP_FRAME_COUNT)/2;
 
-    const int framesToUse = 5;
+    const int framesToUse = 15;
 
     namedWindow("Frame", CV_WINDOW_NORMAL);
 

@@ -1,0 +1,36 @@
+\contentsline {section}{\numberline {1}Background}{1}{section.1}
+\contentsline {subsection}{\numberline {1.1}Formation Skydiving}{1}{subsection.1.1}
+\contentsline {subsubsection}{\numberline {1.1.1}Rules}{1}{subsubsection.1.1.1}
+\contentsline {subsubsection}{\numberline {1.1.2}Training Practices}{1}{subsubsection.1.1.2}
+\contentsline {subsection}{\numberline {1.2}Project Brief}{2}{subsection.1.2}
+\contentsline {section}{\numberline {2}Literature Report}{5}{section.2}
+\contentsline {subsection}{\numberline {2.1}Pose Detection}{5}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Active Shape Models}{5}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Template Matching}{7}{subsection.2.3}
+\contentsline {section}{\numberline {3}Final System Design}{7}{section.3}
+\contentsline {subsection}{\numberline {3.1}Computing Background Image}{7}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Foreground Extraction}{7}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Finding Skydivers}{7}{subsection.3.3}
+\contentsline {subsection}{\numberline {3.4}Rotation Metric}{7}{subsection.3.4}
+\contentsline {subsection}{\numberline {3.5}Translation Metric}{7}{subsection.3.5}
+\contentsline {subsection}{\numberline {3.6}Scale Metric}{7}{subsection.3.6}
+\contentsline {subsection}{\numberline {3.7}Initial Model}{7}{subsection.3.7}
+\contentsline {subsection}{\numberline {3.8}Template Matching}{7}{subsection.3.8}
+\contentsline {subsection}{\numberline {3.9}Model Plausibility Test}{7}{subsection.3.9}
+\contentsline {subsection}{\numberline {3.10}Formation Detection}{7}{subsection.3.10}
+\contentsline {subsection}{\numberline {3.11}Landmark Collection Tool}{7}{subsection.3.11}
+\contentsline {subsection}{\numberline {3.12}Template Creation Tool}{7}{subsection.3.12}
+\contentsline {subsection}{\numberline {3.13}Principle Component Analysis Tool}{7}{subsection.3.13}
+\contentsline {subsubsection}{\numberline {3.13.1}Generalised Procrustes Analysis}{7}{subsubsection.3.13.1}
+\contentsline {subsubsection}{\numberline {3.13.2}Principle Component Analysis}{7}{subsubsection.3.13.2}
+\contentsline {section}{\numberline {4}System Implementation}{7}{section.4}
+\contentsline {section}{\numberline {5}Additional Work}{7}{section.5}
+\contentsline {subsection}{\numberline {5.1}Principle Component Analysis Demonstration}{7}{subsection.5.1}
+\contentsline {subsection}{\numberline {5.2}Skeletonisation}{7}{subsection.5.2}
+\contentsline {subsubsection}{\numberline {5.2.1}Skeletonisation Algorithm}{8}{subsubsection.5.2.1}
+\contentsline {subsubsection}{\numberline {5.2.2}Skeleton Simplification Algorithm}{9}{subsubsection.5.2.2}
+\contentsline {section}{\numberline {6}Project Management}{12}{section.6}
+\contentsline {section}{\numberline {7}Conclusion}{12}{section.7}
+\contentsline {subsection}{\numberline {7.1}Critical Evaluation}{12}{subsection.7.1}
+\contentsline {subsection}{\numberline {7.2}Future Work}{12}{subsection.7.2}
+\contentsline {section}{Appendices}{15}{section*.17}

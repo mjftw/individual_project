@@ -151,7 +151,7 @@ These libraries are platform independent; this should ensure that the program is
 Due to the specialist nature of the project, relevant existing literature is somewhat limited.
 However, there does exist relevant literature on various methods for human posture recognition.
 
-\subsection{Posture Detection}
+\subsection{Pose Detection}
 %
 Human pose detection can be a difficult problem to tackle; many factors contribute towards this, such as shadows, occlusions, complicated backgrounds and noisy source images.\\
 There are many different proposed methods to tackle the task of human posture detection; over a wide variety of technologies. Some methods use depth cues extracted from 3d scanner information, such as \cite{kinect_IR} which uses a Microsoft Kinect to detect the human body. Other methods are designed to work with video\cite{video}, creating a 3d estimation of human pose in order to detect people. A common goal is to try to detect the pose of a person from a single static image. There are a variety of ways of doing this such as, using a model-based method, where an explicit pose model must be specified, often requiring complicated 3d modelling and rendering\cite{model-based}. Another method used relies on texture cues in order to perform "Parts-based" object detection\cite{monocular_still_images}, this method neither uses an explicit model, or pre-labelled data.\\

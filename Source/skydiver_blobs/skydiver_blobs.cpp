@@ -224,16 +224,13 @@ int main()
     model = initialModel;
     templatesDyn = templates;
 
-    Mat frameCpy = frame.clone();
-
     int blobNo = 2;
-    while(1)
-    {
-        vector<Point2f> templateMatched(11);
+
+    vector<Point2f> templateMatched(11);
         for(int i=0; i<11; i++)
-           templateMatched[i] = template_match_point(frame, templatesDyn[i], 25, model[blobNo], i);
+           templateMatched[i] = template_match_point(frame, templatesDyn[i], 20, model[blobNo], i);
         vector<Point2f> constrained;
-        PCA_constrain_pts(templateMatched, constrained, pca, PCA_BOX, 4);
+        PCA_constrain_pts(templateMatched, constrained, pca, PCA_BOX, 0);
 
         Procrustes proc;
         proc.procrustes(templateMatched, constrained);
@@ -243,14 +240,45 @@ int main()
         for(int i=0; i<11; i++)
             model[blobNo][i] += translation;
 
-        for(int i=0; i<11; i++)
-            templatesDyn[i] = get_subimg(frame, model[blobNo][i], model[blobNo][ref_pt(i)], templatesDyn[i].rows*0.85).clone();
+//    extract_fg(frame, bg, fgMask, 7, MORPH_ELLIPSE, true, true);
+//    frame &= fgMask;
+//    for(int i=0; i<11; i++)
+//        templatesDyn[i] = get_subimg(frame, model[blobNo][i], model[blobNo][ref_pt(i)], templatesDyn[i].rows).clone();
 
-        draw_body_pts(frameCpy, templateMatched, Scalar(128));
-        draw_body_pts(frameCpy, initialModel[blobNo], Scalar(200));
+    while(1)
+    {
+        Mat framebgr;
+        srcVid.read(framebgr);
+        cvtColor(framebgr, frame, CV_BGR2GRAY);
+//        extract_fg(frame, bg, fgMask, 7, MORPH_ELLIPSE, true, true);
+//        frame &= fgMask;
+        Mat frameCpy = frame.clone();
+
+        for(int j=0; j<1; j++)
+        {
+            vector<Point2f> templateMatched(11);
+            for(int i=0; i<11; i++)
+               templateMatched[i] = template_match_point(frame, templatesDyn[i], 20, model[blobNo], i);
+            vector<Point2f> constrained;
+            PCA_constrain_pts(templateMatched, constrained, pca, PCA_BOX, 2);
+
+            Procrustes proc;
+            proc.procrustes(templateMatched, constrained);
+            model[blobNo] = rotate_pts(constrained, -acos(proc.rotation.at<float>(0,0)), proc.scale, true);
+
+            Point2f translation = get_vec_centroid(templateMatched) - get_vec_centroid(constrained);
+            for(int i=0; i<11; i++)
+                model[blobNo][i] += translation;
+//            model[blobNo] = templateMatched;
+        }
+//        for(int i=0; i<11; i++)
+//            templatesDyn[i] = get_subimg(frame, model[blobNo][i], model[blobNo][ref_pt(i)], templatesDyn[i].rows).clone();
+
+//        draw_body_pts(frameCpy, templateMatched, Scalar(200);
+//        draw_body_pts(frameCpy, initialModel[blobNo], Scalar(128));
         draw_body_pts(frameCpy, model[blobNo], Scalar(256));
         imshow("Test", frameCpy);
-//        srcVid.read(frame);
+        waitKey(1);
     };
 
 

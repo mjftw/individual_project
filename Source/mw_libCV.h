@@ -447,7 +447,7 @@ inline void PCA_constrain_pts(vector<Point2f>& ptsIn, vector<Point2f>& ptsOut, P
     }
     Mat dataMat(1, ptsIn.size()*2, CV_32F, &dataArr);
     Mat dataP = pca.project(dataMat);
-    PCA_constrain(dataP, pca);
+    PCA_constrain(dataP, pca, PCA_BOX, k);
     dataMat = pca.backProject(dataP);
 
     ptsOut.clear();
@@ -559,9 +559,8 @@ inline Point2f template_match_point(Mat& src, Mat& templ, int search_range, vect
     minMaxLoc(searchResult, matchScore, 0, 0, &maxPt);
     Point2f maxPt2f = Point2f_to_Point(maxPt);
 
-
-    circle(searchResult, maxPt, 5, Scalar(0));
-    circle(searchArea, maxPt2f + Point2f(searchArea.rows/2-searchResult.rows/2, searchArea.cols/2-searchResult.cols/2) , 7, 150, 1);
+//    circle(searchResult, maxPt, 5, Scalar(0));
+//    circle(searchArea, maxPt2f + Point2f(searchArea.rows/2-searchResult.rows/2, searchArea.cols/2-searchResult.cols/2) , 7, 150, 1);
 
 
     //move point back to original space
@@ -576,22 +575,17 @@ inline Point2f template_match_point(Mat& src, Mat& templ, int search_range, vect
     circle(srcCpy, maxPt2f, 7, 150, 1);
     draw_body_pts(srcCpy, pts, Scalar(200));
 
-    namedWindow("template");
-    imshow("template", templ);
-
-    namedWindow("search area");
-    imshow("search area", searchArea);
-
-    namedWindow("srcCpy");
-    imshow("srcCpy", srcCpy);
-
-    namedWindow("match");
-    imshow("match", searchResult);
-
-
-    waitKey(0);
-
-
+//    namedWindow("template");
+//    imshow("template", templ);
+//
+//    namedWindow("search area");
+//    imshow("search area", searchArea);
+//
+//    namedWindow("srcCpy");
+//    imshow("srcCpy", srcCpy);
+//
+//    namedWindow("match");
+//    imshow("match", searchResult);
 
     return maxPt2f;
 }
