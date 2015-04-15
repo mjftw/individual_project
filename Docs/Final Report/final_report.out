@@ -7,30 +7,35 @@
 \BOOKMARK [2][-]{subsection.2.1}{Pose Detection}{section.2}% 7
 \BOOKMARK [2][-]{subsection.2.2}{Active Shape Models}{section.2}% 8
 \BOOKMARK [2][-]{subsection.2.3}{Template Matching}{section.2}% 9
-\BOOKMARK [1][-]{section.3}{Final System Design}{}% 10
-\BOOKMARK [2][-]{subsection.3.1}{Computing Background Image}{section.3}% 11
-\BOOKMARK [2][-]{subsection.3.2}{Foreground Extraction}{section.3}% 12
-\BOOKMARK [2][-]{subsection.3.3}{Finding Skydivers}{section.3}% 13
-\BOOKMARK [2][-]{subsection.3.4}{Rotation Metric}{section.3}% 14
-\BOOKMARK [2][-]{subsection.3.5}{Translation Metric}{section.3}% 15
-\BOOKMARK [2][-]{subsection.3.6}{Scale Metric}{section.3}% 16
-\BOOKMARK [2][-]{subsection.3.7}{Initial Model}{section.3}% 17
-\BOOKMARK [2][-]{subsection.3.8}{Template Matching}{section.3}% 18
-\BOOKMARK [2][-]{subsection.3.9}{Model Plausibility Test}{section.3}% 19
-\BOOKMARK [2][-]{subsection.3.10}{Formation Detection}{section.3}% 20
-\BOOKMARK [2][-]{subsection.3.11}{Landmark Collection Tool}{section.3}% 21
-\BOOKMARK [2][-]{subsection.3.12}{Template Creation Tool}{section.3}% 22
-\BOOKMARK [2][-]{subsection.3.13}{Principle Component Analysis Tool}{section.3}% 23
-\BOOKMARK [3][-]{subsubsection.3.13.1}{Generalised Procrustes Analysis}{subsection.3.13}% 24
-\BOOKMARK [3][-]{subsubsection.3.13.2}{Principle Component Analysis}{subsection.3.13}% 25
-\BOOKMARK [1][-]{section.4}{System Implementation}{}% 26
-\BOOKMARK [1][-]{section.5}{Additional Work}{}% 27
-\BOOKMARK [2][-]{subsection.5.1}{Principle Component Analysis Demonstration}{section.5}% 28
-\BOOKMARK [2][-]{subsection.5.2}{Skeletonisation}{section.5}% 29
-\BOOKMARK [3][-]{subsubsection.5.2.1}{Skeletonisation Algorithm}{subsection.5.2}% 30
-\BOOKMARK [3][-]{subsubsection.5.2.2}{Skeleton Simplification Algorithm}{subsection.5.2}% 31
-\BOOKMARK [1][-]{section.6}{Project Management}{}% 32
-\BOOKMARK [1][-]{section.7}{Conclusion}{}% 33
-\BOOKMARK [2][-]{subsection.7.1}{Critical Evaluation}{section.7}% 34
-\BOOKMARK [2][-]{subsection.7.2}{Future Work}{section.7}% 35
-\BOOKMARK [1][-]{section*.17}{Appendices}{}% 36
+\BOOKMARK [1][-]{section.3}{Problem Analysis and Specification}{}% 10
+\BOOKMARK [1][-]{section.4}{Final System Design}{}% 11
+\BOOKMARK [2][-]{subsection.4.1}{Computing Background Image}{section.4}% 12
+\BOOKMARK [2][-]{subsection.4.2}{Foreground Extraction}{section.4}% 13
+\BOOKMARK [3][-]{subsubsection.4.2.1}{Binary Median Filter}{subsection.4.2}% 14
+\BOOKMARK [2][-]{subsection.4.3}{Model Initialisation}{section.4}% 15
+\BOOKMARK [3][-]{subsubsection.4.3.1}{Finding Skydivers}{subsection.4.3}% 16
+\BOOKMARK [3][-]{subsubsection.4.3.2}{Rotation Metric}{subsection.4.3}% 17
+\BOOKMARK [3][-]{subsubsection.4.3.3}{Image Moments}{subsection.4.3}% 18
+\BOOKMARK [3][-]{subsubsection.4.3.4}{Skydiver Orientation}{subsection.4.3}% 19
+\BOOKMARK [2][-]{subsection.4.4}{Translation Metric}{section.4}% 20
+\BOOKMARK [2][-]{subsection.4.5}{Scale Metric}{section.4}% 21
+\BOOKMARK [2][-]{subsection.4.6}{Initial Model}{section.4}% 22
+\BOOKMARK [2][-]{subsection.4.7}{Template Matching}{section.4}% 23
+\BOOKMARK [2][-]{subsection.4.8}{Model Plausibility Test}{section.4}% 24
+\BOOKMARK [2][-]{subsection.4.9}{Formation Detection}{section.4}% 25
+\BOOKMARK [2][-]{subsection.4.10}{Landmark Collection Tool}{section.4}% 26
+\BOOKMARK [2][-]{subsection.4.11}{Template Creation Tool}{section.4}% 27
+\BOOKMARK [2][-]{subsection.4.12}{Principle Component Analysis Tool}{section.4}% 28
+\BOOKMARK [3][-]{subsubsection.4.12.1}{Generalised Procrustes Analysis}{subsection.4.12}% 29
+\BOOKMARK [3][-]{subsubsection.4.12.2}{Principle Component Analysis}{subsection.4.12}% 30
+\BOOKMARK [1][-]{section.5}{System Implementation}{}% 31
+\BOOKMARK [1][-]{section.6}{Additional Work}{}% 32
+\BOOKMARK [2][-]{subsection.6.1}{Principle Component Analysis Demonstration}{section.6}% 33
+\BOOKMARK [2][-]{subsection.6.2}{Skeletonisation}{section.6}% 34
+\BOOKMARK [3][-]{subsubsection.6.2.1}{Skeletonisation Algorithm}{subsection.6.2}% 35
+\BOOKMARK [3][-]{subsubsection.6.2.2}{Skeleton Simplification Algorithm}{subsection.6.2}% 36
+\BOOKMARK [1][-]{section.7}{Project Management}{}% 37
+\BOOKMARK [1][-]{section.8}{Conclusion}{}% 38
+\BOOKMARK [2][-]{subsection.8.1}{Critical Evaluation}{section.8}% 39
+\BOOKMARK [2][-]{subsection.8.2}{Future Work}{section.8}% 40
+\BOOKMARK [1][-]{section*.20}{Appendices}{}% 41

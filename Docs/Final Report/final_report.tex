@@ -10,12 +10,15 @@
 \usepackage[toc,page]{appendix}
 \usepackage{multirow}
 \usepackage{pdfpages}
+\usepackage{todonotes}
 %
 %\geometry{bindingoffset=35mm}
 
 \providecommand{\keywords}[1]{\textbf{\textit{Keywords ---}} #1}
 
 \begin{document}
+
+\listoftodos
 
 \begin{titlepage}
 \begin{center}{\LARGE
@@ -42,6 +45,7 @@ MEng Electronic Engineering\\}
 \end{center}
 \end{titlepage}
 %
+
 \renewenvironment{abstract}
   {\small\quotation
   {\bfseries\noindent{\large\abstractname}\par\nobreak\smallskip}}
@@ -194,28 +198,49 @@ Using this method it is possible to find weather a skeleton of a skydiver is via
 	\subsection{Computing Background Image}
 	%median image of video
 	\subsection{Foreground Extraction}
-	%Median filter:
+		\subsubsection{Binary Median Filter}
 	%The classic way doing a median filter is to go through each point in the image, and take the surrounding
 	%8 pixels values, sort them, pick the median, and use that as the new value for the anhor pixel
 	%However, for a binary image, this process can be optimised.
 	%Since we know each pixel will either be 0 or 1, we don't need to sort the values of the surrounding pixels
 	%and instead we just add them to see the value of the total. If the total is greater than 4, then
-	%the median is 1, and 0 otherwise. This can be efficiently implimented by creating an n by n mask filled 
-	%with ones, and convoving it with binary mask to create a new image with each pixel containing the sum of
+	%the median is 1, and 0 otherwise. This can be efficiently implemented by creating an n by n mask filled 
+	%with ones, and convolving it with binary mask to create a new image with each pixel containing the sum of
 	%its neighbours. The image is then thresholded at 4.5, causing any pixel who had more 1 than 0
-	%neighbours to be set to white, and any with more 0 neigbours to be set to black, which would
+	%neighbours to be set to white, and any with more 0 neighbours to be set to black, which would
 	%be the same result as doing the median filter by the classic method.
-	%Contour detection
-	%Standard deviation for contour sizes was calculated
-	%Only keep contours that are larger than n standard deviations
-	%Only the external contours were taken, this caused any internal contour information to be lost
-	%causing gaps between the skydiver blobs to be filled unintentionally. This was fixed by
-	%creating a second mask image that retained the hole information, and taking the final
-	%skydiver blobs as the result of ANDing the two masks
-	\subsection{Finding Skydivers}
-	%Contour detection
-	%Find 4 larges contours
-	\subsection{Rotation Metric}
+	\subsection{Model Initialisation}
+	\subsubsection{Finding Skydivers}
+	\todo[inline]{Add a figure for each step}
+	The purpose of this part of the system was to find a suitable frame to be used in order to create the initial contours, and binary masks of the skydivers.
+	This frame should clearly show four separate skydivers, who are not touching.
+	This was achieved in the following way:
+	\begin{enumerate}
+		\item Take a greyscale frame from the source video 
+		\item Perform background subtraction on the frame in order to get an approximate binary mask of the skydivers
+		\item Apply the binary median filter to
+		\item Find the external contours of the binary mask
+		\item Calculate the standard deviation of the area of the list of contours
+		\item Keep only contours whose area is greater than one standard deviation of the mean area
+		\item Sort the remaining contours by area, in descending order
+		\item Take the four largest contours to represent the four skydivers.
+	If less than four four contours remain after removing the smaller contours, then go back to step 1.
+	\end{enumerate}
+	If four contours with an area greater than one standard deviation of the mean cannot be found, it is likely to be for one of the following reasons:
+	\begin{itemize}
+		\item The frame was not an image of the four skydivers as expected
+		\item The frame was an image of the four skydivers, but two or more of the skydivers were touching.
+		This would be the case if a formation was made. This failure would occur because the external contour of the overlapping skydivers would be seen as a single contour, and thus the number of contours of an appropriate size would be less than four.
+		\item The calculated background image was not representative of the video background
+	\end{itemize}
+	%
+	Only finding the external contours caused any internal contour information to be lost.
+	This meant that when the contours were drawn to create the binary masks, any gaps between the skydivers were filled unintentionally.
+	This was fixed by creating a second mask image that retained the hole information, and taking the final
+	skydiver blobs as the result of performing the logical AND operation on the two masks.
+	\todo[inline]{Add a figure to demonstrate this as well}
+%
+	\subsubsection{Rotation Metric}
 		\subsubsection{Image Moments}
 		%Second image moment
 		%Give formulae for calculation image moments
@@ -311,8 +336,6 @@ Using this method it is possible to find weather a skeleton of a skydiver is via
 %
 \section{System Implementation}
 \noindent In order to complete this project C++ will be used, making use of the open source computer vision library OpenCV 3.0\cite{\cite{OpenCV}} in order to reduce the time required to perform standard tasks, such as loading an image file, or receiving a video feed.
-If a graphical user interface (GUI) were to be implemented, the open source GUI library Qt 5.3\cite{Qt} would be used.
-These libraries are platform independent; this should ensure that the program is not tied to any single operating system.
 %
 
 \section{Additional Work}
