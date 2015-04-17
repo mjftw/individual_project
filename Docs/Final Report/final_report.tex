@@ -13,7 +13,6 @@
 \usepackage{todonotes}
 %
 %\geometry{bindingoffset=35mm}
-
 \providecommand{\keywords}[1]{\textbf{\textit{Keywords ---}} #1}
 
 \begin{document}
@@ -56,7 +55,7 @@ MEng Electronic Engineering\\}
 \begin{abstract}\textbf{\emph{
 	Abstract here...
 }}\end{abstract}
-\keywords{computer vision, video analysis, formation skydiving, posture detection}
+\keywords{computer vision, formation skydiving, pose detection, template matching, active shape models}
 \clearpage
 
 \textsc{\thispagestyle{empty}
@@ -103,7 +102,7 @@ In order for the team to create formations in the sky, it is important that they
 	\caption{Images reproduced from \url{www.skydivespaceland.com/blog/images/creepers2.jpg} and \url{www.skydiveaz.com/images/old-images/creepers.jpg}}
 \end{figure}
 %
-\noindent Another way that FS teams train is to use a vertical (indoor skydiving) wind tunnel. A fan is mounted at the bottom of the tunnel creating a strong wind that the skydivers can float on; simulating the environment of a regular skydive, but in a much more controlled environment \textbf{\emph{(see figure \ref{fig:sample_tunnel})}}.
+\noindent Another way that FS teams train is to use a vertical (indoor skydiving) wind tunnel. A fan is mounted at the bottom or bottom of the tunnel creating a strong wind that the skydivers can float on; simulating the environment of a regular skydive, but in a much more controlled environment \textbf{\emph{(see figure \ref{fig:sample_tunnel})}}.
 	\subsection{Project Brief}
 The original focus of the project was to analyse video of dirt diving and identify which formations have been performed. The focus has been changed slightly, and is now to analyse footage of formation skydiving in a vertical wind tunnel. This change is largely due to the fact that the body position of a skydiver free-fall is much more similar to their body position in a wind tunnel, than when dirt diving. Another benefit of analysing footage taken in a wind tunnel is that the camera is mounted above the formation, remaining static \textbf{\emph{(see figure \ref{fig:sample_tunnel})}}. This allows the skydivers to much more easily be separated from the background via background subtraction\cite{Piccardi}. The set of formations that will be analysed are the BPA rookie class of formations known as 'randoms'. The software must be able to recognise all 16 of the randoms \textbf{\emph{(see figure \ref{fig:fs_dive_pool})}}.
 %
@@ -147,10 +146,6 @@ The original focus of the project was to analyse video of dirt diving and identi
 	\label{fig:stick_model_fitted}
 \end{figure}
 %
-\noindent In order to complete this project C++ will be used, making use of the open source computer vision library OpenCV 3.0\cite{\cite{OpenCV}} in order to reduce the time required to perform standard tasks, such as loading an image file, or receiving a video feed.
-If a graphical user interface (GUI) were to be implemented, the open source GUI library Qt 5.3\cite{Qt} would be used.
-These libraries are platform independent; this should ensure that the program is not tied to any single operating system.
-%
 \section{Literature Report}
 %
 Due to the specialist nature of the project, relevant existing literature is somewhat limited.
@@ -192,6 +187,7 @@ Using this method it is possible to find weather a skeleton of a skydiver is via
 
 
 \section{Problem Analysis and Specification}
+\todo[inline]{Define terms to be used somewhere, e.g. landmark model, skydiver mask}
 \section{Final System Design}
 %	Run down of main program flow. Reference appendix for flowchart
 
@@ -199,20 +195,86 @@ Using this method it is possible to find weather a skeleton of a skydiver is via
 	%median image of video
 	\subsection{Foreground Extraction}
 		\subsubsection{Binary Median Filter}
-	%The classic way doing a median filter is to go through each point in the image, and take the surrounding
-	%8 pixels values, sort them, pick the median, and use that as the new value for the anhor pixel
-	%However, for a binary image, this process can be optimised.
-	%Since we know each pixel will either be 0 or 1, we don't need to sort the values of the surrounding pixels
-	%and instead we just add them to see the value of the total. If the total is greater than 4, then
-	%the median is 1, and 0 otherwise. This can be efficiently implemented by creating an n by n mask filled 
-	%with ones, and convolving it with binary mask to create a new image with each pixel containing the sum of
-	%its neighbours. The image is then thresholded at 4.5, causing any pixel who had more 1 than 0
-	%neighbours to be set to white, and any with more 0 neighbours to be set to black, which would
-	%be the same result as doing the median filter by the classic method.
+	The classic way of doing a median filter is to apply a median go through each point in the image, and take the surrounding
+	8 pixels values, sort them by value, pick the median, and use that as the new value for the central pixel.
+	However, for a binary image, this process can be optimised.
+	Since we know each pixel will either be 0 or 1, it is unnecessary to sort the values of the surrounding pixels
+	,instead they are just added, and the total examined. If the total is greater than 4, then
+	the median is 1, and 0 otherwise.\\
+	This can be efficiently implemented by creating an n by n mask filled 
+	with ones, and convolving it with the binary image to create a new greyscale image with each pixel containing the sum of
+	it's neighbours. The image is then thresholded at 4.5, causing any pixel which had more neighbours containing ones than zeroes
+	to take the value of 1, and any with more 0 neighbours to take the value of 0
+	This gives the same result as applying the median filter in the classic way, but with much lower computation time, as only convolution and thresholding 	are required.
+	\todo[inline]{Add a figure for each step, with comparison images of classic way, and binary optimisation}
+	\todo[inline]{Add a figure to show the ones mask used}
+	%
+	\subsection{Rotation Metric}
+		\subsubsection{Image Moments}
+		\todo[inline]{Mention principle components, and how the formula conveniently  resembles that of image moments, and give formulae for calculation image moments. Second image moment.}
+		Another method that was tried was to find the minimum area rotated rectangle of the mask, and take it's angle to be the major axis of the 				skydiver. 
+		OpenCV has a function for finding the minimum area rectangle. Unfortunately, the angle it returns is the perpendicular angle to the rectangle's
+		side closest to 0 degrees. This means that if this angle were used for the major axis, it may be 90, 180, or 270 degrees off.
+		As a result, this method could not be used.
+		\todo[inline]{Add a figure showing the min area rotated rect around the skydiver mask, with the major axis drawn, and the the
+		angle returned from the min area rotated rect drawn.}
+		\subsubsection{Skydiver Orientation}
+		The major axis defines the angle of the line that runs along the skydivers spine.
+		The line will either point towards the skydivers head, or crotch, but it is not possible to know which.
+		This meant that the angle returned from the function to calculate the major axis was often off by 180 degrees.\\
+		In order to test if the angle calculated points towards the head or feet of the skydiver,
+		the assumption is made that the distance from the skydivers centroid to their groin will be less
+		than the distance from their centroid to their head.
+		These distances are calculated by starting at the centroid, and then iteratively moving a
+		test point further away in the direction of the major axis angle
+		This is done until the test point is no longer in the skydiver mask.
+		This gives the first distance, labelled the 'up' distance.
+		The second distance, the 'down' distance, is found by repeating the process, but instead moving the
+		test point in the direction 180 degrees from the major axis angle.
+		The distances are then compared, and if the 'down' distance is greater than the 'up' distance
+		the major axis angle is thought to be 180 degrees out.
+		In this case 180 degrees is added or subtracted
+		accordingly, so as to make sure the angle stays in the range 0 - 360 degrees.
+		\todo[inline]{Add figures showing the up and down distances labelled on the skydiver mask}
+%
+	\subsection{Translation Metric}
+	%1.Image moments, first moment
+	%2. Centroid of points
+	%Center point of the minimum area rotated rectangle could also be used for this
+	Another method that could be used is to find the minimum area rotated rectangle enclosing the skydiver mask or landmark model.
+	The center point of the rotated rectangle would then be assumed to be the center point of the mask or landmark model.
+	However, this would only work if the mask or landmark model was symmetric. 
+	If this was not the case, this method would give an incorrect centroid point.
+	\todo[inline]{include figure showing skydiver mask centroid using the two methods, demonstrating that the min area rect center does not work.)}
+	
+	\subsection{Scale Metric}
+	%Centroid size formula
+	A scale metric was required in order to compare the sizes of different binary images, and contours.
+	\todo[inline]{Add an explanation as to why this was required at the top of the section.}
+	Two separate methods were tried in order to find a reliable metric that could be used to compare the sizes of different binary images, and contours.
+	The first of which was to use the centroid size, which is the square root of the summed squared distances from each point to the centroid.
+	\todo[inline]{Include centroid size equation and ref}
+	While this could be used to compare the relative size of the landmark model between iterations, it was not useful when comparing the size of the binary
+	mask to the landmark model.\\
+	\todo{define how "it was not useful"}
+	The method that was finally employed was to find the minimum area rotated rectangle enclosing the landmark model, or binary mask, and use it's enclosed 	area as a scale metric. This proved to be more reliable when comparing the landmark model to a binary mask.
+	\subsection{Template Matching}
+	%Move a template accross the image and calculate how much it fits at each point
+	%Take find the area of greatest fit from the resulting image 
+	\subsection{Model Plausibility Test}
+	%Project model points using the PCA model
+	%Check the resulting components are with n std deviations of the mean
+	%the std deviation varies for each component, and is lower for each subsequent component
+	%talk about PCA demo tool & reference that part of the report
+	%constrain the components by clipping them down to +- n std deviations if they are outside this range
+	%(Box constraint)
+	%Project the points back to get get new model
+	%PCA removes all scale, rotation, and translation information from the model
+	%Scale, rotate, and translate the model, using information from procrustes analysis
 	\subsection{Model Initialisation}
 	\subsubsection{Finding Skydivers}
 	\todo[inline]{Add a figure for each step}
-	The purpose of this part of the system was to find a suitable frame to be used in order to create the initial contours, and binary masks of the skydivers.
+	The purpose of this part of the system was to find a suitable frame to be used in order to create the initial contours, and binary masks of the 			skydivers.
 	This frame should clearly show four separate skydivers, who are not touching.
 	This was achieved in the following way:
 	\begin{enumerate}
@@ -230,7 +292,7 @@ Using this method it is possible to find weather a skeleton of a skydiver is via
 	\begin{itemize}
 		\item The frame was not an image of the four skydivers as expected
 		\item The frame was an image of the four skydivers, but two or more of the skydivers were touching.
-		This would be the case if a formation was made. This failure would occur because the external contour of the overlapping skydivers would be seen as a single contour, and thus the number of contours of an appropriate size would be less than four.
+		This would be the case if a formation was made. This failure would occur because the external contour of the overlapping skydivers would be seen as 		a single contour, and thus the number of contours of an appropriate size would be less than four.
 		\item The calculated background image was not representative of the video background
 	\end{itemize}
 	%
@@ -240,53 +302,25 @@ Using this method it is possible to find weather a skeleton of a skydiver is via
 	skydiver blobs as the result of performing the logical AND operation on the two masks.
 	\todo[inline]{Add a figure to demonstrate this as well}
 %
-	\subsubsection{Rotation Metric}
-		\subsubsection{Image Moments}
-		%Second image moment
-		%Give formulae for calculation image moments
-		%The minimum area rotated rectangle around the skydiver mask was also used to try to calculate
-		%rotation. OpenCV comes with a function that can do this, but unfortunately the angle it returns
-		%is only guarenteed to be correct to the nearest 90 degrees.
-		\subsubsection{Skydiver Orientation}
-		%Talk about the fix to check weather to rotate the skydiver by 180 degrees
-		%Calculating the major axis will not tell you which way up the skydiver should be
-		%This means that the angle of the major axis could be out by 180 degrees.
-		%To test if the angle calculated points towards the head or feet of the skydiver,
-		%the assumpton is made that the distance from the skydivers centroid to groin will be less
-		%than the distance from their centroid to their head.
-		%These distances are calculated by starting at the centroid, and then repeatedly moving a
-		%test point further away, along the major axis, until the test point is no longer in the skydiver mask
-		%This gives the first distance, labelled the 'up' distance.
-		%The second distance, the 'down' distance, is found by repeating the process, but instead moving the
-		%test point from the centroid in the dirction 180 degrees from the major axis angle.
-		%The distances are then compared, and if the 'down' distance is greater than the 'up' distance,
-		%The major axis angle is thought to be 180 degrees out, and 180 degrees is added or subtracted
-		%accordingly, so as to make sure the angle stays in the range 0 - 360 degrees.
-	\subsection{Translation Metric}
-	%1.Image moments, first moment
-	%2. Centroid of points
-	%Center point of the minimum area rotated rectangle could also be used for this
-	\subsection{Scale Metric}
-	%Centroid size formula
-	%Area of minimum area rotated roctangle was used as a scale metric, since it would only be the ratio
-	%between the scale metrics of the shapes being tested, this works well
-	\subsection{Initial Model}
-	\subsection{Template Matching}
-	%Move a template accross the image and calculate how much it fits at each point
-	%Take find the area of greatest fit from the resulting image 
-	\subsection{Model Plausibility Test}
-	%Project model points using the PCA model
-	%Check the resulting components are with n std deviations of the mean
-	%the std deviation varies for each component, and is lower for each subsequent component
-	%talk about PCA demo tool & reference that part of the report
-	%constrain the components by clipping them down to +- n std deviations if they are outside this range
-	%(Box constraint)
-	%Project the points back to get get new model
-	%PCA removes all scale, rotation, and translation information from the model
-	%Scale, rotate, and translate the model, using information from procrustes analysis
 	\subsection{Formation Detection}
 	
 	\subsection{Landmark Collection Tool}
+	In order to create the landmark model, a training set of landmarks must first be collected.
+	These landmarks could then be used to perform principle component analysis \todo[inline]{Ref} and collect the templates \todo[inline]{Ref}.
+	A separate program was written to do this whose function is as follows:
+	\begin{enumerate}
+		\item Load a training video of skydivers performing 4-way formation skydiving in the wind tunnel
+		\item Take a number of sample frames from this video
+		\item On each frame the user clicks on each landmark position in the order waist, neck, head, left hand, left elbow, left knee, left foot,
+		right foot, right knee, right elbow, right hand, as shown in figure \textbf{\emph{(see figure \ref{fig:stick_model_fitted})}}
+		\item The user then presses space in order to save the collected points
+		\item A stick man is then drawn over the points that were just labelled in order to verify that they were collected correctly
+		\item This is done four times, once for every skydiver in the frame, allowing 4 sets of landmarks to be collected for every frame
+		\item This process is repeated for each sample frame, and the data is saved to a file in the matrix format shown in \textbf{\emph{figure \ref{fig:shape_matrix}}}
+	\end{enumerate}
+	Each frame used to collect landmarks is also saved as an image to be used by the template creation program.
+	
+	
 	%Idea is to display a frame from the source video, and then mark the 11 key points on each of the 4
 	%skydivers in the frame
 	%Left click to add a point, right click to remove one, middle click to skip frame
@@ -300,6 +334,13 @@ Using this method it is possible to find weather a skeleton of a skydiver is via
 	%Include screenshots of consol window, alongside frame with skeletons drawn on it
 	
 	\subsection{Template Creation Tool}
+	In order to perform template matching, a template image for each landmark must be made.
+	A separate program was written to do this.
+	As it's input it takes the landmark matrix, and saved frames produced by the landmark collection program.
+	It then takes rotation independent samples of each frame, centred at each of the landmarks, and creates
+	a template image for each landmark point.
+	The template images are calculated as mean of all of the samples for that landmark point.
+	Taking the mode of the samples was also considered as a possibility, but this method 
 	%The idea is to create a general template for each part of the skydiver: hands, elbows, head etc.
 	%These templates would later be used to perform templpate matching on the frames in order to refine
 	%the keypoints in the skydiver model

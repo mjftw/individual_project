@@ -1,2 +1,14 @@
-\contentsline {todo}{Add a figure for each step}{6}{section*.12}
-\contentsline {todo}{Add a figure to demonstrate this as well}{7}{section*.13}
+\contentsline {todo}{Define terms to be used somewhere, e.g. landmark model, skydiver mask}{6}{section*.12}
+\contentsline {todo}{Add a figure for each step, with comparison images of classic way, and binary optimisation}{7}{section*.13}
+\contentsline {todo}{Add a figure to show the ones mask used}{7}{section*.14}
+\contentsline {todo}{Mention principle components, and how the formula conveniently resembles that of image moments, and give formulae for calculation image moments. Second image moment.}{7}{section*.15}
+\contentsline {todo}{Add a figure showing the min area rotated rect around the skydiver mask, with the major axis drawn, and the the angle returned from the min area rotated rect drawn.}{7}{section*.16}
+\contentsline {todo}{Add figures showing the up and down distances labelled on the skydiver mask}{7}{section*.17}
+\contentsline {todo}{include figure showing skydiver mask centroid using the two methods, demonstrating that the min area rect center does not work.)}{8}{section*.18}
+\contentsline {todo}{Add an explanation as to why this was required at the top of the section.}{8}{section*.19}
+\contentsline {todo}{Include centroid size equation and ref}{8}{section*.20}
+\contentsline {todo}{define how "it was not useful"}{8}{section*.21}
+\contentsline {todo}{Add a figure for each step}{8}{section*.22}
+\contentsline {todo}{Add a figure to demonstrate this as well}{9}{section*.23}
+\contentsline {todo}{Ref}{9}{section*.24}
+\contentsline {todo}{Ref}{9}{section*.25}
