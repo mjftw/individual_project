@@ -14,6 +14,7 @@
 %
 %\geometry{bindingoffset=35mm}
 \providecommand{\keywords}[1]{\textbf{\textit{Keywords ---}} #1}
+\setlength{\parindent}{0cm}
 
 \begin{document}
 
@@ -189,7 +190,9 @@ Using this method it is possible to find weather a skeleton of a skydiver is via
 \section{Problem Analysis and Specification}
 \todo[inline]{Define terms to be used somewhere, e.g. landmark model, skydiver mask}
 \section{Final System Design}
+In order to complete this project C++ was used, making use of the open source computer vision library OpenCV 3.0\cite{\cite{OpenCV}} in order to reduce the time required to perform standard tasks, such as loading an image file, or receiving a video feed.
 %	Run down of main program flow. Reference appendix for flowchart
+
 
 	\subsection{Computing Background Image}
 	%median image of video
@@ -260,7 +263,21 @@ Using this method it is possible to find weather a skeleton of a skydiver is via
 	The method that was finally employed was to find the minimum area rotated rectangle enclosing the landmark model, or binary mask, and use it's enclosed 	area as a scale metric. This proved to be more reliable when comparing the landmark model to a binary mask.
 	\subsection{Template Matching}
 	%Move a template accross the image and calculate how much it fits at each point
-	%Take find the area of greatest fit from the resulting image 
+	%Take find the area of greatest fit from the resulting image
+	The search patch is a rotated square with side length $l_I=l_T + 2S$, where  $l_T$ and $S$ are the side length of the template square, and the additional search area respectively.
+	It is centred at the landmark point which is to be updated via template matching.
+	The the search patch is extracted from the frame, and rotated, in the same way that the sub-images used to create the templates were.
+	This means that the body part in the search patch has the best
+	chance of lining up with the template, allowing for template matching.
+	The template image ($T$) slides over the search patch ($I$) and it is compared to section of the search patch underneath it at every pixel. The result image ($R$) is formed from the template match amount at every pixel location.
+	The method used to determine the template match at each point was OpenCV's method \emph{CV\_TM\_CCORR\_NORMED}.
+	$$R(x,y) = \frac{\sum_{x^{'},y^{'}}(T(x^{'},y^{'}) . I(x+x^{'},y+y^{'}))}{\sqrt{\sum_{x^{'},y^{'}}T(x^{'},y^{'})^2 . \sum_{x^{'},y^{'}} I(x+x^{'},y+y^{'})^2}}$$
+		The OpenCV function matchTemplate(...) \todo{ref opencv function website}was used for this.
+	\todo[inline]{Include figures showing the template, search area, and match amount, with max match point circled}
+	$R$ is then normalised, and the highest value pixel represents the location where the template best matched.\\
+	This point will be used for the updated landmark point, but first it must be transformed back to the correct coordinate space.
+	This is done by reversing the effective translation, and rotation that was applied to the sample patch.
+	
 	\subsection{Model Plausibility Test}
 	%Project model points using the PCA model
 	%Check the resulting components are with n std deviations of the mean
@@ -336,47 +353,66 @@ Using this method it is possible to find weather a skeleton of a skydiver is via
 	\subsection{Template Creation Tool}
 	In order to perform template matching, a template image for each landmark must be made.
 	A separate program was written to do this.
-	As it's input it takes the landmark matrix, and saved frames produced by the landmark collection program.
+	As it's input it takes the landmark matrix, and all saved frames produced by the landmark collection program.
 	It then takes rotation independent samples of each frame, centred at each of the landmarks, and creates
 	a template image for each landmark point.
-	The template images are calculated as mean of all of the samples for that landmark point.
-	Taking the mode of the samples was also considered as a possibility, but this method 
-	%The idea is to create a general template for each part of the skydiver: hands, elbows, head etc.
-	%These templates would later be used to perform templpate matching on the frames in order to refine
-	%the keypoints in the skydiver model
-	%Talk about subimg extraction function:
-	%Use two points to define the rotation for each sample, the point being sampled, and some reference
-	%List each central point, and it's reference point
-	%Talk about how the angle is calculated from these two points (just trig)
-	%Create a rotated rect at the center point, at the angle calculated, with a width and height
-	%Equal to how large the templates should be
-	%Collect A subimg for every point in the input matrix, 11 per keypoints vector
-	%Take the mean of all of the subimages for each keypoint to get a template for that key point
-	%Talk about how a binary mask subimage is also taken for each point
-	%It was originally done becasue the mean of the subimages always tended to be black,
-	%and it was assumed that this was becuase taking the mean of the background was causing
-	%the image to cancel out and equal zero. The binary mask was used to prevent this by removing
-	%the background before taking the mean of the subimages.
-	%It was later found that the black templates were due to the method the mean was being taken
-	%All of the subimages would be summed, then divided by the number of subimages
-	%As each image was stored with 8-bits, a maximum value of 256, the sum of the images would quickly
-	%reach the maximum value, and clip at 256.
-	%This meant that when the sum images were divided by the number of subimages used, they would always appear
-	%to be black.
-	%This was fixed by taking the mean in a different way, taking the cumulative mean
-	%Include both mean formulas
-	%Using the cumulative mean prevented the template being created from ever becoming too bright
-	%This allowed a mean image of each keypoint subimage to be calculated.
-	%These mean templates were then saved
+	\\\\
+	In order to create a template, all the sample images for that landmark point must be rotated in such a way
+	that they are aligned.
+	\todo[inline]{include a figure showing aligned and unaligned images (different rotation)}
+	%
+	In order the calculate the rotation ($\theta$) for a landmark point ($P_l$), a reference point ($P_r$) is used (\textbf{\emph{see table 			\ref{table:ref_points}}}).
+	$$\theta = \arctan2(\frac{P_r.y - P_l.y}{{P_r.x - P_l.x}})$$
+	%
+	\begin{table}[H]
+	\centering
+	\resizebox{\textwidth}{!}{%
+	\begin{tabular}{l|l|l|l|l|l|l|l|l|l|l|l}
+	\textbf{Landmark Point}  & Waist & Neck  & Head & Left Hand  & Left Elbow & Left Knee & Left Foot & Right Foot & Right Knee & Right Elbow & Right Hand  \\ 			\hline
+	\textbf{Reference Point} & Neck  & Waist & Neck & Left Elbow & Neck       & Waist     & Left Knee & Left Knee  & Waist      & Neck        & Right Elbow \\ 
+	\end{tabular}
+	}
+	\caption{Table showing the reference point used for each landmark point}
+	\label{table:ref_points}
+	\end{table}
+	%
+	The reference points were chosen in order to make sure that body part in the sample is always pointing to the left, but
+	it should be arbitrary which point is used as a reference, so long as the same point is used consistently.
+	
+	The landmark point representing the left hand will be used to demonstrate the process:
+	\begin{enumerate}
+		\item Calculate find which reference point should be used from a look up table
+		\item Calculate the rotation angle $\theta$
+		\item Rotate a copy of the frame by $\theta$
+		\item Create a square sub-image from the sample, centred at $P_l$, with side length l
+		\item Save the sub-image, to be used later in creating the template for that landmark point
+	\end{enumerate}
+	This process is repeated for every landmark vector in the landmark matrix \ref{fig:shape_matrix}, generating $n$ sub-images
+	for each landmark point, where $n$ is the number of landmark vectors.
+	The template image is then calculated as mean of all of the sub-images for that landmark point.
+	$$T = \hat{S}$$
+ 	Where $T$ and $S$ are the template image and the set of sub-images for the landmark point respectively.\\	
+	Initially the naïve approach used was to simply sum all the sub-images, and divide each pixel value 
+	in the resulting image by $n$ to give the template image.
+	$$T = \frac{1}{n}\sum_{I \in S} I$$
+
+	However, this method was unsuccessful as the sub-images were 8-bit; summing them quickly caused the pixels
+	in the sum image to reach the maximum value of 255.
+	When they were then divided by n, it resulted in a very dark image, containing containing little to no information.\\
+	In order to avoid this issue, the cumulative moving average of the sub-images was used instead.
+	$$T_{i+1} = T_i + \frac{S_{i+1} - T_i}{i+1}, T_1 = S_1$$
+	The formula is iterated until $i = n-1$ at which point $T_i=\hat{S}$ and the template image is complete.
+	This prevented the templates from saturating, and produced usable template images (\textbf{\emph{see figure \todo[inline]{Ref}}}).
+	Taking the median of the sample images was also considered as a possibility, but this method
+	was rejected as all of the sample images had a very similar background, likely causing
+	the median image to be almost entirely background, which is not useful for the templates.
+	%
 	\subsection{Principle Component Analysis Tool}
 		\subsubsection{Generalised Procrustes Analysis}
 		
 		\subsubsection{Principle Component Analysis}
 
 %
-%
-\section{System Implementation}
-\noindent In order to complete this project C++ will be used, making use of the open source computer vision library OpenCV 3.0\cite{\cite{OpenCV}} in order to reduce the time required to perform standard tasks, such as loading an image file, or receiving a video feed.
 %
 
 \section{Additional Work}
